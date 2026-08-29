@@ -5,7 +5,7 @@
 **一个完全跑在浏览器里的完整 DAW。**
 排鼓、写旋律、挂效果器混音、把 Pattern 排列成整曲，最后导出真实 WAV。免安装、无账户、无后端：鼓与合成器用 Web Audio 实时发声，旋律性乐器用打包的真实采样，全部在浏览器端完成。
 
-> 🎧 **在线体验：** _<https://你的用户名.github.io/neon-daw/>_ —— 开启 Pages（Settings → Pages → Source 选 **GitHub Actions**）后填入；仓库已内置部署工作流。
+> 🎧 **在线体验：** _<https://xanthanl.github.io/neon-daw/>_ —— 开启 Pages（Settings → Pages → Source 选 **GitHub Actions**）后填入；仓库已内置部署工作流。
 
 ![NeonDAW 首页](screenshots/home-desktop.png)
 
@@ -54,6 +54,7 @@
 
 ### ⌨️ Live Keys
 - 25 键触控键盘 + 八度移调，支持**循环叠录**：Pattern 循环时弹奏，就近量化写进当前循环。
+- 桌面端可直接用**物理键盘**弹奏（`a s d f g h j k` = 白键、`w e t y u` = 黑键）；按住/松开干净释放（指针捕获 + 窗口失焦释放）。
 
 ### 🎲 Random
 - 一键抽一种命名风格，生成调式、和声、动机、鼓组、曲式自洽的整曲，并自动切到 Song 试听。可选 **3–8 个 Pattern**：数越多，编曲越长、声部越多（lead / pad / arp 逐级加入）、groove 越密。

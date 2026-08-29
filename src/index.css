@@ -213,8 +213,11 @@
   animation: progress-slide 1.05s ease-in-out infinite alternate;
 }
 
-/* Pattern 条等横向滚动容器：滚动条外观走全局三明治主题，这里只留一点底部留白 */
+/* Pattern 条等横向滚动容器：滚动条走全局三明治主题；上下各留白，
+   因为 overflow-x:auto 会让 overflow-y 也变 auto（隐式裁剪），
+   胶囊 hover 上浮时若不预留顶部空间，顶边会被裁掉 */
 .hscroll {
+  padding-top: 4px;
   padding-bottom: 4px;
 }
 

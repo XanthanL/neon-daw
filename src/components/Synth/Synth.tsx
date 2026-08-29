@@ -225,7 +225,7 @@ export function Synth() {
       {/* 合成器通道选择 */}
       <div className="flex shrink-0 items-center gap-2 border-b-2 border-ink/10 bg-bg-warm/60 px-3 py-2 md:px-4">
         <span className="label-caps hidden shrink-0 sm:inline">{t.synth.channel}</span>
-        <div className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto pb-0.5">
+        <div className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto py-1">
           {synthChannels.map((c) => {
             const on = c.id === selected.id;
             return (

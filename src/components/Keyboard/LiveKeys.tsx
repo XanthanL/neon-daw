@@ -39,6 +39,12 @@ const PRESET_COLORS: Record<string, string> = {
 
 const KEY_COUNT = 25; // 两个八度 + 高音 C
 
+/* 电脑键盘 → 半音偏移（相对当前 low，即 C）。桌面可用物理键弹奏：
+   a s d f g h j k = 白键 C D E F G A B C'，w e t y u = 黑键 C# D# F# G# A# */
+const KEYMAP: Record<string, number> = {
+  a: 0, w: 1, s: 2, e: 3, d: 4, f: 5, t: 6, g: 7, y: 8, h: 9, u: 10, j: 11, k: 12,
+};
+
 function Keyboard({
   channel,
   octaveShift,
@@ -61,6 +67,42 @@ function Keyboard({
     pressed.current.clear();
     setActive(new Set());
   }, [channel.id, octaveShift]);
+
+  /* 桌面物理键盘弹奏：keydown/keyup 映射到当前八度的键。
+     ref 指向最新 press/release/low（在下方 press/release 定义后赋值），监听只绑一次。 */
+  const pressRef = useRef<((m: number) => void) | null>(null);
+  const releaseRef = useRef<((m: number) => void) | null>(null);
+  const lowRef = useRef(low);
+  lowRef.current = low;
+  useEffect(() => {
+    const isTyping = () => {
+      const el = document.activeElement as HTMLElement | null;
+      return !!el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
+    };
+    const down = (e: KeyboardEvent) => {
+      if (e.repeat || e.ctrlKey || e.metaKey || e.altKey || isTyping()) return;
+      const off = KEYMAP[e.key.toLowerCase()];
+      if (off === undefined) return;
+      e.preventDefault();
+      pressRef.current?.(lowRef.current + off);
+    };
+    const up = (e: KeyboardEvent) => {
+      const off = KEYMAP[e.key.toLowerCase()];
+      if (off === undefined) return;
+      releaseRef.current?.(lowRef.current + off);
+    };
+    const blur = () => {
+      for (const m of [...pressed.current.keys()]) releaseRef.current?.(m);
+    };
+    window.addEventListener('keydown', down);
+    window.addEventListener('keyup', up);
+    window.addEventListener('blur', blur);
+    return () => {
+      window.removeEventListener('keydown', down);
+      window.removeEventListener('keyup', up);
+      window.removeEventListener('blur', blur);
+    };
+  }, []);
 
   const press = (midi: number) => {
     if (pressed.current.has(midi)) return;
@@ -126,6 +168,10 @@ function Keyboard({
     );
   };
 
+  /* 让窗口级键盘监听始终调用最新的 press/release */
+  pressRef.current = press;
+  releaseRef.current = release;
+
   const whites: number[] = [];
   for (let m = low; m < low + KEY_COUNT; m++) if (!isBlackKey(m)) whites.push(m);
   const numWhite = whites.length;
@@ -133,14 +179,18 @@ function Keyboard({
   const keyHandlers = (m: number) => ({
     onPointerDown: (e: React.PointerEvent) => {
       e.preventDefault();
+      (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
       press(m);
     },
-    onPointerUp: () => release(m),
+    onPointerUp: (e: React.PointerEvent) => {
+      (e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId);
+      release(m);
+    },
     onPointerCancel: () => release(m),
   });
 
   return (
-    <div className="relative h-36 w-full touch-none select-none sm:h-44 md:h-52">
+    <div className="relative flex h-36 w-full touch-none select-none sm:h-44 md:h-52">
       {whites.map((m) => (
         <button
           key={m}
@@ -249,7 +299,7 @@ export function LiveKeys() {
       {/* 音色通道选择 */}
       <div className="flex items-center gap-2 border-b-2 border-ink/10 bg-bg-warm/60 px-3 py-2 md:px-4">
         <span className="label-caps hidden shrink-0 sm:inline">{t.liveKeys.preset}</span>
-        <div className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto pb-0.5">
+        <div className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto py-1">
           {synthChannels.map((c) => {
             const on = c.id === selected.id;
             return (
@@ -328,7 +378,7 @@ export function LiveKeys() {
       {/* 预设快切（点击直接套用到当前通道） */}
       <div className="flex items-center gap-2 border-b-2 border-ink/10 bg-bg-warm/40 px-3 py-1.5 md:px-4">
         <Music2 className="h-4 w-4 shrink-0 text-ink/45" strokeWidth={2.4} />
-        <div className="flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto pb-0.5">
+        <div className="flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto py-1">
           {SYNTH_PRESETS.map((p) => (
             <button
               key={p.id}

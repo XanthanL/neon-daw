@@ -5,7 +5,7 @@
 **A complete DAW that runs entirely in your browser.**
 Sequence drums, roll melodies, mix through an effect chain, arrange a full song — and export a real WAV file. No install, no account, no backend: drums and synths are generated live with the Web Audio API, melodic instruments use bundled real samples, and everything is produced and rendered in the browser.
 
-> 🎧 **Live demo:** _<https://YOUR-USERNAME.github.io/neon-daw/>_ — fill this in after enabling Pages (Settings → Pages → Source: **GitHub Actions**); the deploy workflow ships with the repo.
+> 🎧 **Live demo:** _<https://xanthanl.github.io/neon-daw/>_ — fill this in after enabling Pages (Settings → Pages → Source: **GitHub Actions**); the deploy workflow ships with the repo.
 
 ![NeonDAW home](screenshots/home-desktop.png)
 
@@ -54,6 +54,7 @@ drums (step sequencer) → melody (piano roll) → mix (fx + faders) → arrange
 
 ### ⌨️ Live Keys
 - 25-key touch keyboard with octave shift — and **loop overdub**: play along while a pattern loops and your take is quantized into the grid.
+- On desktop you can also play with the **physical keyboard** (`a s d f g h j k` = white keys, `w e t y u` = black keys); held notes release cleanly (pointer-capture + window-blur release).
 
 ### 🎲 Random
 - One tap draws a named style and generates a coherent full song — key, chord plan (voicings & voice-leading), a developing motif, groove density and form — then plays it back. Pick **3–8 patterns**: more patterns means a longer arrangement, more layers (lead / pad / arp join in) and denser grooves.

@@ -77,7 +77,7 @@ function Tile({ m }: { m: ModuleDef }) {
 
 export function HomeGrid() {
   return (
-    <div className="grid h-full grid-cols-2 auto-rows-[minmax(150px,1fr)] content-start gap-2.5 overflow-y-auto p-2.5 pb-1 md:grid-cols-4 md:grid-rows-2 md:auto-rows-fr md:gap-4 md:overflow-hidden md:p-0">
+    <div className="grid h-full grid-cols-2 auto-rows-[minmax(150px,1fr)] content-start gap-2.5 overflow-y-auto p-3.5 md:grid-cols-4 md:grid-rows-2 md:auto-rows-fr md:gap-4 md:overflow-hidden md:p-4">
       {MODULES.map((m) => (
         <Tile key={m.id} m={m} />
       ))}
