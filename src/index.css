@@ -1,0 +1,226 @@
+@import "tailwindcss";
+
+/* ============================================================
+   三明治法则 Design Tokens
+   底层（冷白高级感） / 中层（粗黑卡通描边+硬阴影） / 顶层（荧光高光 ≤10%）
+   ============================================================ */
+@theme {
+  /* ---- 底层 · 大面积高级感 ---- */
+  --color-bg: #f1f0f7; /* 冷紫白页面底 */
+  --color-bg-warm: #fafaf8; /* 米白 */
+  --color-card: #ffffff; /* 纯白卡片 */
+  --color-panel: #f5f5f4; /* 浅灰面板 */
+
+  /* ---- 中层 · 轮廓 ---- */
+  --color-ink: #17171c; /* 黑描边 / 主文字 */
+
+  /* ---- 文字三级 ---- */
+  --color-fg: #17171c; /* 主 */
+  --color-fg-muted: #6e6e78; /* 次 */
+  --color-fg-faint: #a8a8b2; /* 弱 */
+
+  /* ---- 顶层 · 荧光高光（小面积 ≤10%） ---- */
+  --color-neon-cyan: #00e5ff;
+  --color-neon-pink: #ff3dbe;
+  --color-neon-yellow: #ffe600;
+  --color-neon-green: #39ff88;
+
+  /* ---- 通道功能色（荧光家族 8 色） ---- */
+  --color-ch-cyan: #00e5ff;
+  --color-ch-pink: #ff3dbe;
+  --color-ch-yellow: #ffe600;
+  --color-ch-green: #39ff88;
+  --color-ch-purple: #a78bfa;
+  --color-ch-blue: #4d9fff;
+  --color-ch-orange: #ff9f1c;
+  --color-ch-magenta: #ff5ca8;
+
+  /* ---- 硬阴影（不模糊的贴纸阴影） ---- */
+  --shadow-hard: 3px 3px 0 #17171c;
+  --shadow-hard-lg: 5px 5px 0 #17171c;
+  --shadow-hard-sm: 1px 1px 0 #17171c;
+
+  /* ---- 荧光辉光 ---- */
+  --shadow-glow-cyan: 0 0 10px rgba(0, 229, 255, 0.65);
+  --shadow-glow-pink: 0 0 10px rgba(255, 61, 190, 0.65);
+  --shadow-glow-yellow: 0 0 10px rgba(255, 230, 0, 0.65);
+  --shadow-glow-green: 0 0 10px rgba(57, 255, 136, 0.65);
+
+  /* ---- 字体 ---- */
+  --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, "PingFang SC",
+    "Microsoft YaHei", sans-serif;
+
+  /* ---- spring 弹跳动效曲线 ---- */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    /* 冷紫白底 + 极淡点阵纹理（纸感） */
+    background-color: var(--color-bg);
+    background-image: radial-gradient(
+      rgba(23, 23, 28, 0.055) 1px,
+      transparent 1.2px
+    );
+    background-size: 22px 22px;
+    color: var(--color-fg);
+    min-height: 100vh;
+    margin: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* 全站禁止文本选中（防误选中按钮/贴纸上的文字），输入控件例外 */
+  body {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  input,
+  textarea {
+    user-select: text;
+    -webkit-user-select: text;
+  }
+
+  /* 移动端：按钮取消双击缩放（虚拟键盘区由 .touch-none 全权接管） */
+  button {
+    touch-action: manipulation;
+  }
+
+  ::selection {
+    background: rgba(0, 229, 255, 0.35);
+  }
+
+  /* 全站统一滚动条（三明治风格）：细、圆头墨色，悬停荧光青；竖 / 横一致，覆盖 Firefox + WebKit */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(23, 23, 28, 0.28) transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(23, 23, 28, 0.28);
+    border: 3px solid transparent;
+    border-radius: 999px;
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-neon-cyan);
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+}
+
+@layer components {
+  /* 三明治贴纸卡片：白底 + 黑描边 + 硬阴影 */
+  .card-sandwich {
+    @apply rounded-2xl border-2 border-ink bg-card;
+    box-shadow: var(--shadow-hard);
+  }
+
+  /* 小型贴纸（胶囊/标签） */
+  .sticker-sandwich {
+    @apply rounded-xl border-2 border-ink bg-card;
+    box-shadow: var(--shadow-hard-sm);
+  }
+
+  /* 小型大写宽字距标签 */
+  .label-caps {
+    @apply text-xs font-semibold tracking-widest text-fg-muted uppercase;
+  }
+
+  /* 荧光激活态贴纸（小面积高光专用） */
+  .sticker-neon {
+    @apply rounded-xl border-2 border-ink;
+    box-shadow:
+      var(--shadow-hard-sm),
+      var(--shadow-glow-cyan);
+  }
+}
+
+/* ============================================================
+   步进音序器 / 钢琴卷帘 · 播放联动动效
+   ============================================================ */
+
+/* 步进格播放瞬闪（荧光爆闪：亮度冲高回落） */
+@keyframes step-flash {
+  0% {
+    filter: brightness(2.3) saturate(1.5);
+  }
+  100% {
+    filter: brightness(1) saturate(1);
+  }
+}
+.step-flash {
+  animation: step-flash 180ms ease-out;
+}
+
+/* 播放列高亮（列扫过瞬亮渐隐） */
+@keyframes play-col-flash {
+  0% {
+    background-color: rgba(0, 229, 255, 0.3);
+  }
+  100% {
+    background-color: rgba(0, 229, 255, 0.08);
+  }
+}
+.play-col {
+  background-color: rgba(0, 229, 255, 0.08);
+  animation: play-col-flash 200ms ease-out;
+}
+
+/* 音符命中发光（荧光青 box-shadow 爆闪，动画期间覆盖内联阴影） */
+@keyframes note-hit {
+  0% {
+    box-shadow:
+      1.5px 1.5px 0 #17171c,
+      0 0 4px rgba(0, 229, 255, 1),
+      0 0 14px rgba(0, 229, 255, 0.95);
+    filter: brightness(1.9);
+  }
+  100% {
+    box-shadow:
+      1.5px 1.5px 0 #17171c,
+      0 0 0 rgba(0, 229, 255, 0);
+    filter: brightness(1);
+  }
+}
+.note-hit {
+  animation: note-hit 220ms ease-out;
+}
+
+/* 导出进度 · 离线渲染阶段无中间回调（浏览器原生线程），用滑动条表示「仍在干活」 */
+@keyframes progress-slide {
+  0% {
+    left: -36%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+.progress-indeterminate {
+  animation: progress-slide 1.05s ease-in-out infinite alternate;
+}
+
+/* Pattern 条等横向滚动容器：滚动条外观走全局三明治主题，这里只留一点底部留白 */
+.hscroll {
+  padding-bottom: 4px;
+}
+
+/* 触屏无 hover：提示气泡彻底不出现（否则点按后会卡在屏幕上并溢出视口） */
+@media (hover: none) {
+  .group\/tip > [role='tooltip'] {
+    display: none;
+  }
+}
