@@ -54,6 +54,17 @@ export const noteUrl = (instrument: string, midi: number, layer?: string): strin
 /** 并发限流加载 */
 const CONCURRENCY = 6;
 
+/**
+ * 声源级增益校准（dB）：采样录音的绝对电平远低于合成器（离线独奏实测
+ * RMS 差 8~15dB），不补偿就会“琴小声、鼓炸耳”。数值以合成声部组为锚对齐。
+ */
+const SAMPLE_TRIM_DB: Record<string, number> = {
+  piano: 8,
+  electric_piano_1: 15,
+  acoustic_bass: 15,
+  synth_strings_1: 15,
+};
+
 export class SampleVoice {
   /** 规范乐器名（public/samples 下文件夹名） */
   readonly instrument: string;
@@ -67,6 +78,7 @@ export class SampleVoice {
 
   constructor(instrument: string) {
     this.instrument = INSTRUMENT_ALIAS[instrument] ?? instrument;
+    this.out.volume.value = SAMPLE_TRIM_DB[this.instrument] ?? 0;
     this.layerDirs = INSTRUMENT_LAYERS[this.instrument] ?? [undefined];
     this.samplers = Array.from({ length: this.layerDirs.length }, () => {
       const s = new Tone.Sampler();

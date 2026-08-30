@@ -32,7 +32,8 @@ function createKick(params: DrumParams): DrumVoice {
     oscillator: { type: 'sine' },
     envelope: { attack: 0.0008, decay: params.decay ?? 0.42, sustain: 0 },
   });
-  synth.volume.value = 3;
+  // 独奏实测 +3dB 时峰值 ~0.87 会顶住 master limiter 造成整曲抽吸，回落到 0
+  synth.volume.value = 0;
   const note = Tone.Frequency('C1').transpose(params.tune ?? 0).toNote();
   return {
     output: synth,
@@ -88,8 +89,9 @@ function createClap(params: DrumParams): DrumVoice {
   });
   burst.connect(bp);
   tail.connect(bp);
-  burst.volume.value = 2;
-  tail.volume.value = 2;
+  // 808 拍手是节奏骨架声部，实测原 +2dB 峰值仅 0.11，抬到与军鼓同量级
+  burst.volume.value = 8;
+  tail.volume.value = 8;
   return {
     output: bp,
     trigger(v, t) {
@@ -119,7 +121,8 @@ function createHat(open: boolean, params: DrumParams): DrumVoice {
     octaves: 1.6,
   });
   synth.frequency.value = baseFreq;
-  synth.volume.value = -10;
+  // 实测 −10dB 峰值仍近 0.5，镲在齐奏里盖过旋律，再收 3dB（开镲收 2dB）
+  synth.volume.value = open ? -12 : -13;
   const hp = new Tone.Filter({ type: 'highpass', frequency: 7200 });
   synth.connect(hp);
   return {
@@ -143,6 +146,7 @@ function createTom(params: DrumParams): DrumVoice {
     oscillator: { type: 'sine' },
     envelope: { attack: 0.001, decay: params.decay ?? 0.38, sustain: 0 },
   });
+  synth.volume.value = -3;
   const note = Tone.Frequency('A2').transpose(params.tune ?? 0).toNote();
   return {
     output: synth,

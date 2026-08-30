@@ -140,6 +140,7 @@ export function RandomDraw() {
   );
 
   const importProject = useProjectStore((s) => s.importProject);
+
   const setPlayMode = useUiStore((s) => s.setPlayMode);
   const t = useT();
 
@@ -270,7 +271,7 @@ export function RandomDraw() {
 
           {error && <p className="text-sm font-bold text-neon-pink">{error}</p>}
 
-          {/* 移动端可视化：和声横条 + 音符雨（桌面挪到两侧栏） */}
+          {/* 移动端可视化：和声横条（桌面挪到左栏） */}
           <section className="card-sandwich flex w-full flex-col gap-2 p-2.5 lg:hidden">
             <div className="label-caps flex items-center gap-1.5 px-0.5">
               <ListMusic className="h-3.5 w-3.5" strokeWidth={2.6} />
@@ -278,13 +279,6 @@ export function RandomDraw() {
             </div>
             <div className="flex h-14">
               <ChordStream viz={viz} orientation="horizontal" />
-            </div>
-            <div className="label-caps flex items-center gap-1.5 px-0.5">
-              <AudioWaveform className="h-3.5 w-3.5" strokeWidth={2.6} />
-              {t.random.rhythm}
-            </div>
-            <div className="flex h-72">
-              <RhythmGame viz={viz} />
             </div>
           </section>
 
@@ -297,6 +291,15 @@ export function RandomDraw() {
             )}
           </AnimatePresence>
 
+          {/* 节奏挑战：紧跟抽出的音乐卡片下方 */}
+          <section className="card-sandwich flex h-[420px] w-full flex-col p-3 md:h-[460px]">
+            <div className="label-caps mb-1.5 flex items-center gap-1.5">
+              <AudioWaveform className="h-3.5 w-3.5" strokeWidth={2.6} />
+              {t.random.rhythm}
+            </div>
+            <RhythmGame viz={viz} />
+          </section>
+
           {/* 警告贴纸 */}
           <div className="flex w-full items-center gap-2 rounded-xl border-2 border-ink bg-neon-yellow/25 px-3 py-2 shadow-hard-sm">
             <AlertTriangle className="h-4 w-4 shrink-0 text-ink" strokeWidth={2.6} />
@@ -305,15 +308,6 @@ export function RandomDraw() {
             </p>
           </div>
         </main>
-
-        {/* 桌面右栏：节奏挑战（旋律 4 轨下落，DFJK 击打） */}
-        <aside className="card-sandwich sticky top-3 hidden h-[520px] w-[280px] shrink-0 flex-col self-start p-3 lg:flex">
-          <div className="label-caps mb-1.5 flex items-center gap-1.5">
-            <AudioWaveform className="h-3.5 w-3.5" strokeWidth={2.6} />
-            {t.random.rhythm}
-          </div>
-          <RhythmGame viz={viz} />
-        </aside>
       </div>
     </div>
   );

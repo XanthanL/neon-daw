@@ -152,7 +152,7 @@ const BASE: StyleDef = {
   ],
   form: [f('Intro', 4), f('Verse', 8), f('Chorus', 8, 2), f('Outro', 4)],
   mix: {
-    vol: { bass: 0.8, lead: 0.72, keys: 0.55, pad: 0.42, arp: 0.4 },
+    vol: { bass: 0.8, lead: 0.68, keys: 0.68, pad: 0.34, arp: 0.4 },
     pan: { lead: 0.12, keys: -0.18, pad: 0, arp: 0.22 },
   },
   fx: {
@@ -182,6 +182,7 @@ type Override = {
   bias?: Partial<Record<RoleId, readonly string[]>>;
   voice?: VoiceHint;
   acousticBass?: boolean;
+  drumTune?: Partial<Record<DrumType, { tune?: number; decay?: number }>>;
 };
 
 const mk = (
@@ -220,6 +221,7 @@ const mk = (
   bias: o.bias,
   voice: o.voice,
   acousticBass: o.acousticBass,
+  drumTune: o.drumTune,
 });
 
 /* ============================================================
@@ -281,6 +283,7 @@ export const STYLES: readonly StyleDef[] = [
     bpm: [72, 84],
     voice: 'dark',
     bias: { keys: ['keys-epiano', 'keys-glass'], lead: ['pluck-soft', 'lead-square'], pad: ['pad-warm'], bass: ['bass-deep-sub'] },
+    drumTune: { kick: { tune: -5, decay: 0.55 }, snare: { tune: -3, decay: 0.22 }, closedHat: { decay: 0.08 } },
     scales: ['minorPent', 'dorian', 'major'],
     harmony: {
       prog: [
@@ -326,6 +329,7 @@ export const STYLES: readonly StyleDef[] = [
     bpm: [96, 110],
     voice: 'bright',
     bias: { bass: ['bass-deep-sub', 'bass-acid'], lead: ['lead-saw', 'lead-bright'], pad: ['pad-dream'], keys: ['keys-glass', 'keys-epiano'] },
+    drumTune: { kick: { tune: -2, decay: 0.5 }, tom: { tune: -2 } },
     scales: ['minor', 'dorian', 'phrygian'],
     harmony: {
       prog: [
@@ -374,6 +378,7 @@ export const STYLES: readonly StyleDef[] = [
     bpm: [122, 128],
     voice: 'punchy',
     bias: { keys: ['keys-epiano', 'keys-organ'], bass: ['bass-deep-sub'], pad: ['pad-warm'], lead: ['pluck-fm', 'lead-bright'] },
+    drumTune: { kick: { tune: 1, decay: 0.28 }, openHat: { decay: 0.3 } },
     scales: ['minor', 'dorian', 'majorPent'],
     harmony: {
       prog: [
@@ -422,6 +427,7 @@ export const STYLES: readonly StyleDef[] = [
     bpm: [128, 140],
     voice: 'dark',
     bias: { bass: ['bass-acid', 'bass-deep-sub'], lead: ['pluck-fm', 'lead-square'], pad: ['pad-dream'], keys: ['keys-glass'] },
+    drumTune: { kick: { decay: 0.25 }, clap: { decay: 0.1 } },
     scales: ['minor', 'phrygian', 'harmonicMinor'],
     harmony: {
       prog: [
@@ -469,6 +475,7 @@ export const STYLES: readonly StyleDef[] = [
     bpm: [138, 150],
     voice: 'dark',
     bias: { bass: ['bass-deep-sub'], keys: ['keys-glass', 'keys-epiano'], lead: ['lead-square', 'pluck-fm'], pad: ['pad-dream'] },
+    drumTune: { kick: { tune: -5, decay: 0.85 }, snare: { tune: 2, decay: 0.22 }, clap: { decay: 0.28 }, closedHat: { decay: 0.035 }, tom: { tune: -4, decay: 0.5 } },
     scales: ['minorPent', 'phrygian', 'minor'],
     harmony: {
       prog: [
@@ -516,6 +523,7 @@ export const STYLES: readonly StyleDef[] = [
     bpm: [168, 176],
     voice: 'punchy',
     bias: { bass: ['bass-growl', 'bass-deep-sub'], pad: ['pad-dream'], keys: ['keys-epiano', 'pluck-soft'], lead: ['lead-square'] },
+    drumTune: { kick: { tune: -2, decay: 0.28 }, snare: { tune: 4, decay: 0.16 }, closedHat: { decay: 0.05 } },
     scales: ['minor', 'dorian', 'harmonicMinor'],
     harmony: {
       prog: [
@@ -563,6 +571,7 @@ export const STYLES: readonly StyleDef[] = [
     bpm: [84, 96],
     voice: 'soft',
     bias: { keys: ['keys-piano', 'keys-epiano'], bass: ['bass-growl'], pad: ['pad-warm'], lead: ['lead-bright', 'pluck-soft'], arp: ['pluck-fm'] },
+    drumTune: { kick: { tune: -2, decay: 0.42 }, snare: { tune: -1, decay: 0.2 } },
     scales: ['minor', 'dorian', 'major'],
     harmony: {
       prog: [
@@ -654,6 +663,7 @@ export const STYLES: readonly StyleDef[] = [
     bpm: [126, 146],
     voice: 'soft',
     bias: { keys: ['keys-piano', 'keys-epiano'], lead: ['pluck-karplus', 'pluck-soft'], pad: ['pad-warm'], bass: ['bass-growl'] },
+    drumTune: { snare: { tune: 7, decay: 0.09 }, tom: { tune: 5, decay: 0.12 } },
     acousticBass: true,
     scales: ['major', 'lydian', 'majorPent'],
     harmony: {
@@ -701,6 +711,7 @@ export const STYLES: readonly StyleDef[] = [
     bpm: [100, 114],
     voice: 'bright',
     bias: { keys: ['keys-organ', 'keys-piano'], bass: ['bass-growl', 'bass-deep-sub'], lead: ['pluck-soft', 'pluck-karplus'], pad: ['pad-warm'] },
+    drumTune: { snare: { tune: 4, decay: 0.12 }, tom: { tune: 3, decay: 0.2 } },
     scales: ['majorPent', 'mixolydian', 'major'],
     harmony: {
       prog: [
@@ -796,6 +807,7 @@ export const STYLES: readonly StyleDef[] = [
     bpm: [112, 132],
     voice: 'punchy',
     bias: { bass: ['bass-growl'], lead: ['lead-saw', 'lead-bright'], keys: ['keys-organ', 'keys-piano'], pad: ['pad-warm'] },
+    drumTune: { kick: { tune: 1, decay: 0.24 }, snare: { tune: 2, decay: 0.2 } },
     scales: ['mixolydian', 'minorPent', 'major'],
     harmony: {
       prog: [
@@ -843,6 +855,7 @@ export const STYLES: readonly StyleDef[] = [
     bpm: [160, 190],
     voice: 'bright',
     bias: { bass: ['bass-growl'], lead: ['lead-square', 'lead-saw'], keys: ['keys-organ'] },
+    drumTune: { kick: { tune: 2, decay: 0.2 }, snare: { tune: 3, decay: 0.16 } },
     scales: ['major', 'mixolydian', 'minor'],
     harmony: {
       prog: [
@@ -887,6 +900,7 @@ export const STYLES: readonly StyleDef[] = [
     bpm: [72, 88],
     voice: 'soft',
     bias: { bass: ['bass-deep-sub'], keys: ['keys-organ', 'keys-epiano'], lead: ['pluck-soft'], pad: ['pad-warm'] },
+    drumTune: { kick: { tune: -3, decay: 0.5 }, snare: { tune: -2, decay: 0.2 } },
     scales: ['minorPent', 'major', 'mixolydian'],
     harmony: {
       prog: [
@@ -934,6 +948,7 @@ export const STYLES: readonly StyleDef[] = [
     bpm: [155, 170],
     voice: 'dark',
     bias: { bass: ['bass-deep-sub', 'bass-acid'], keys: ['keys-glass'], lead: ['lead-bright'], pad: ['pad-dream'] },
+    drumTune: { kick: { tune: -2, decay: 0.65 }, tom: { tune: 7, decay: 0.25 }, snare: { tune: 4, decay: 0.16 }, closedHat: { decay: 0.05 } },
     scales: ['harmonicMinor', 'phrygian', 'minor'],
     harmony: {
       prog: [
@@ -980,6 +995,7 @@ export const STYLES: readonly StyleDef[] = [
     bpm: [140, 152],
     voice: 'bright',
     bias: { bass: ['bass-growl', 'bass-deep-sub'], lead: ['lead-saw'], pad: ['pad-warm', 'pad-dream'], keys: ['pluck-fm', 'keys-glass'] },
+    drumTune: { kick: { tune: 1, decay: 0.3 } },
     scales: ['major', 'lydian', 'dorian'],
     harmony: {
       prog: [
@@ -1116,6 +1132,7 @@ export const STYLES: readonly StyleDef[] = [
     bpm: [118, 126],
     voice: 'bright',
     bias: { bass: ['bass-growl'], keys: ['keys-epiano'], pad: ['pad-strings'], lead: ['lead-bright'], arp: ['pluck-fm'] },
+    drumTune: { kick: { tune: 1, decay: 0.26 } },
     scales: ['minor', 'major', 'lydian', 'mixolydian'],
     harmony: {
       prog: [
@@ -1304,6 +1321,7 @@ export const STYLES: readonly StyleDef[] = [
     bpm: [138, 146],
     voice: 'dark',
     bias: { bass: ['bass-deep-sub'], keys: ['keys-glass', 'pluck-fm'], pad: ['pad-dream'], lead: ['lead-bright'] },
+    drumTune: { kick: { tune: -6, decay: 0.9 }, snare: { tune: -2, decay: 0.25 }, closedHat: { decay: 0.04 }, tom: { decay: 0.4 } },
     scales: ['harmonicMinor', 'phrygian', 'minor'],
     harmony: {
       prog: [
@@ -1352,6 +1370,7 @@ export const STYLES: readonly StyleDef[] = [
     bpm: [74, 90],
     voice: 'punchy',
     bias: { keys: ['keys-organ', 'keys-epiano'], lead: ['lead-saw'], bass: ['bass-growl'] },
+    drumTune: { kick: { decay: 0.3 }, snare: { tune: 2, decay: 0.24 } },
     scales: ['mixolydian'],
     harmony: {
       /* 12 小节近似：I–IV–I–V 循环，全部叠成属七（混利底亚的 I/IV/V 七和弦天然属七） */
@@ -1444,6 +1463,7 @@ export const STYLES: readonly StyleDef[] = [
     bpm: [100, 108],
     voice: 'bright',
     bias: { keys: ['keys-piano', 'keys-epiano'], pad: ['pad-warm'], lead: ['pluck-karplus'], bass: ['bass-growl'] },
+    drumTune: { snare: { tune: 5, decay: 0.1 }, tom: { tune: 3, decay: 0.25 } },
     scales: ['major', 'lydian', 'minor'],
     harmony: {
       prog: [

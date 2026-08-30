@@ -85,10 +85,10 @@ export interface Pattern {
   notes: Note[];
 }
 
-/** 鼓通道调音参数（tune：半音移位；decay：衰减秒数） */
+/** 鼓通道调音参数（tune：半音移位；decay：衰减秒数；缺省用各鼓声部默认值） */
 export interface DrumTuneParams {
-  tune: number;
-  decay: number;
+  tune?: number;
+  decay?: number;
 }
 
 /** 乐器通道（含鼓组与合成器） */
