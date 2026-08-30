@@ -371,6 +371,7 @@ function buildProject(
       kind: 'drum',
       color: DRUM_COLORS[dt],
       drumType: dt,
+      drumParams: style.drumTune?.[dt],
       mixerTrackId: `track-${dt}`,
     });
     mixerTracks.push({
