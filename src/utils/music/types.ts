@@ -201,6 +201,8 @@ export interface StyleDef {
   voice?: VoiceHint;
   /** 低音走真实立式贝斯采样（摇摆 / 拉丁 / 乡村语境） */
   acousticBass?: boolean;
+  /** 鼓组风格化调音（如 trap 的长衰减 808 kick、lo-fi 的垂坠底鼓） */
+  drumTune?: Partial<Record<DrumType, { tune?: number; decay?: number }>>;
 }
 
 /* ============================================================
