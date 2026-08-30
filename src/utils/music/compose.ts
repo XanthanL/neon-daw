@@ -8,8 +8,6 @@
  * 5. Song 编排：同段 repeat → 多个 clip 复用同一 patternId
  * 6. validateProject 兜底，不合规则重抽（≤3 次后抛错）
  */
-import { SYNTH_PRESETS, type PresetCategoryId, type SynthPreset } from '../../audio/synthPresets';
-import { SAMPLE_INSTRUMENTS } from '../../audio/samples';
 import type {
   Channel,
   DrumType,
@@ -28,6 +26,7 @@ import { chordAtStep, fitRegister, makeKey, planHarmony } from './theory';
 import type { KeyCtx } from './theory';
 import { buildBass, buildDrums } from './groove';
 import { describeOps, makeMotif, phraseArc, realize } from './motif';
+import { designVoice } from './timbre';
 import { drawStyle, getStyle } from './styles';
 import type {
   CadenceKind,
@@ -244,16 +243,6 @@ function buildArp(
 }
 
 /* ============================================================
- * 预设指派（16 预设 / 5 类，只挑选不新增）
- * ============================================================ */
-
-function pickPreset(cats: readonly PresetCategoryId[], used: string[], rng: Rng): SynthPreset {
-  const fresh = SYNTH_PRESETS.filter((p) => cats.includes(p.category) && !used.includes(p.id));
-  const pool = fresh.length ? fresh : SYNTH_PRESETS.filter((p) => cats.includes(p.category));
-  return rng.pick(pool.length ? pool : SYNTH_PRESETS);
-}
-
-/* ============================================================
  * 校验
  * ============================================================ */
 
@@ -345,27 +334,22 @@ function buildProject(
     pad: 'ch-pad',
     arp: 'ch-arp',
   };
-  /* 旋律/和声性角色用真实采样（引擎内未加载键自动回退合成器）；lead/arp 保留合成质感 */
-  const roleSample: Partial<Record<RoleId, string>> = {
-    keys: SAMPLE_INSTRUMENTS.piano,
-    bass: SAMPLE_INSTRUMENTS.bass,
-    pad: SAMPLE_INSTRUMENTS.strings,
-  };
+  /* 音色由「风格 bias + 现场锻造」决定：每次抽卡都得到独一无二但贴风格的参数 */
   const usedPresets: string[] = [];
   const infoRoles: GeneratedRole[] = [];
 
   for (const spec of roleSpecs) {
-    const preset = pickPreset(spec.cats, usedPresets, rng);
-    usedPresets.push(preset.id);
-    const name = `${ROLE_LABEL[spec.role]} · ${preset.name}`;
+    const voiced = designVoice(style, spec, bpm, usedPresets, rng);
+    usedPresets.push(voiced.preset.id);
+    const name = `${ROLE_LABEL[spec.role]} · ${voiced.preset.name}`;
     const id = roleChannel[spec.role];
     channels.push({
       id,
       name,
       kind: 'synth',
       color: ROLE_COLORS[spec.role],
-      synthParams: { ...preset.params },
-      sampleInstrument: roleSample[spec.role],
+      synthParams: voiced.params,
+      sampleInstrument: voiced.sample,
       mixerTrackId: `track-${spec.role}`,
     });
     mixerTracks.push({
@@ -377,7 +361,7 @@ function buildProject(
       solo: false,
       effects: (style.fx[spec.role] ?? []).map((f) => fxOf(f.type, f.params)),
     });
-    infoRoles.push({ role: spec.role, label: ROLE_LABEL[spec.role], preset: preset.name });
+    infoRoles.push({ role: spec.role, label: ROLE_LABEL[spec.role], preset: voiced.preset.name });
   }
 
   for (const dt of DRUM_ORDER) {
@@ -430,7 +414,20 @@ function buildProject(
     const intensity = clamp(0, 3, INTENSITY[seg.kind] + (d >= 0.6 ? 1 : 0));
     const climax = seg.kind === 'Chorus';
     const total = seg.bars * BAR_STEPS;
-    const chords = planHarmony(ctx, prog, style.harmony, rng, {
+    /* 段落和声动力学：主歌稀疏、副歌加厚；Outro 收束（vamp 风格也给终止式，
+       弗里几亚/利底亚等会触发 planHarmony 的减和弦护栏自动退回 vamp） */
+    const extScale = intensity >= 3 ? 1.35 : intensity <= 1 ? 0.55 : 1;
+    const rawExt = style.harmony.ext.map((v) => Math.min(0.9, v * extScale)) as [number, number, number];
+    const extSum = rawExt[0] + rawExt[1] + rawExt[2];
+    const ext = extSum > 0.92 ? rawExt.map((v) => (v * 0.92) / extSum) : rawExt;
+    const secHarmony = {
+      ...style.harmony,
+      ext: [ext[0], ext[1], ext[2]] as [number, number, number],
+      inversionP: Math.min(0.85, style.harmony.inversionP + (climax ? 0.12 : 0)),
+      cadence:
+        seg.kind === 'Outro' && style.harmony.cadence === 'vamp' ? ('authentic' as const) : style.harmony.cadence,
+    };
+    const chords = planHarmony(ctx, prog, secHarmony, rng, {
       bars: seg.bars,
       register: compRegister,
       // Bridge 换和弦起点，制造对比而不离调

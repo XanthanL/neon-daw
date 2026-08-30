@@ -54,6 +54,8 @@ export type RoleId = 'bass' | 'lead' | 'keys' | 'pad' | 'arp';
 export type CadenceKind = 'authentic' | 'plagal' | 'vamp';
 export type VoicingKind = 'close' | 'drop2' | 'fourVoice' | 'spread';
 export type EndTarget = 'tonic' | 'third' | 'fifth';
+/** 风格整体音色倾向（timbre 锻造的整形方向） */
+export type VoiceHint = 'bright' | 'dark' | 'punchy' | 'soft' | 'glassy';
 
 /** 贝斯音型（风格辨识度的主要来源之一） */
 export type BassIdiom =
@@ -193,6 +195,12 @@ export interface StyleDef {
   mix: MixSpec;
   fx: Partial<Record<RoleId | 'master', readonly FxSpec[]>>;
   humanize: HumanizeSpec;
+  /** 音色亲和：各角色优先抽取的预设 id（85% 命中，其余回退分类池） */
+  bias?: Partial<Record<RoleId, readonly string[]>>;
+  /** 整体音色倾向，锻造合成参数时的整形方向 */
+  voice?: VoiceHint;
+  /** 低音走真实立式贝斯采样（摇摆 / 拉丁 / 乡村语境） */
+  acousticBass?: boolean;
 }
 
 /* ============================================================

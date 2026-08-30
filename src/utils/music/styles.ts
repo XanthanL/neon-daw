@@ -52,6 +52,7 @@ import type {
   SectionKind,
   StyleDef,
   StyleId,
+  VoiceHint,
 } from './types';
 
 /* ---------------- 小工具 ---------------- */
@@ -178,6 +179,9 @@ type Override = {
   mix?: Partial<MixSpec>;
   fx?: Partial<Record<RoleId | 'master', readonly FxSpec[]>>;
   humanize?: Partial<HumanizeSpec>;
+  bias?: Partial<Record<RoleId, readonly string[]>>;
+  voice?: VoiceHint;
+  acousticBass?: boolean;
 };
 
 const mk = (
@@ -213,10 +217,13 @@ const mk = (
     pan: { ...BASE.mix.pan, ...o.mix?.pan },
   },
   fx: { ...BASE.fx, ...o.fx },
+  bias: o.bias,
+  voice: o.voice,
+  acousticBass: o.acousticBass,
 });
 
 /* ============================================================
- * 20 种风格
+ * 28 种风格
  * ============================================================ */
 
 export const STYLES: readonly StyleDef[] = [
@@ -229,6 +236,8 @@ export const STYLES: readonly StyleDef[] = [
     '明亮大调 · 七九和弦 · 切分贝斯',
     {
       bpm: [106, 118],
+      voice: 'bright',
+      bias: { keys: ['keys-piano', 'keys-epiano'], lead: ['lead-bright', 'lead-saw'], pad: ['pad-warm'], bass: ['bass-growl', 'bass-deep-sub'], arp: ['pluck-fm', 'pluck-karplus'] },
       scales: ['major', 'lydian', 'mixolydian'],
       harmony: {
         ext: [0.4, 0.32, 0.08],
@@ -270,6 +279,8 @@ export const STYLES: readonly StyleDef[] = [
 
   mk('lo-fi', 'Lo-Fi HipHop', '低保真嘻哈', Coffee, '#A78BFA', '慵懒拖拍 · 七九和弦 · 磁带噪声感', {
     bpm: [72, 84],
+    voice: 'dark',
+    bias: { keys: ['keys-epiano', 'keys-glass'], lead: ['pluck-soft', 'lead-square'], pad: ['pad-warm'], bass: ['bass-deep-sub'] },
     scales: ['minorPent', 'dorian', 'major'],
     harmony: {
       prog: [
@@ -313,6 +324,8 @@ export const STYLES: readonly StyleDef[] = [
 
   mk('synthwave', 'Synthwave', '复古合成器浪', Sunrise, '#FF5CA8', '小调四踩 · 八度贝斯 · 大混响主音', {
     bpm: [96, 110],
+    voice: 'bright',
+    bias: { bass: ['bass-deep-sub', 'bass-acid'], lead: ['lead-saw', 'lead-bright'], pad: ['pad-dream'], keys: ['keys-glass', 'keys-epiano'] },
     scales: ['minor', 'dorian', 'phrygian'],
     harmony: {
       prog: [
@@ -359,6 +372,8 @@ export const STYLES: readonly StyleDef[] = [
 
   mk('house', 'House', '浩室', House, '#00E5FF', '四踩底鼓 · 反拍开镲 · 反拍和弦刺', {
     bpm: [122, 128],
+    voice: 'punchy',
+    bias: { keys: ['keys-epiano', 'keys-organ'], bass: ['bass-deep-sub'], pad: ['pad-warm'], lead: ['pluck-fm', 'lead-bright'] },
     scales: ['minor', 'dorian', 'majorPent'],
     harmony: {
       prog: [
@@ -405,6 +420,8 @@ export const STYLES: readonly StyleDef[] = [
 
   mk('techno', 'Techno', '极简工业电子', Cpu, '#4D9FFF', '高速十六分 · 循环 vamp · 冷峻无调性旋律', {
     bpm: [128, 140],
+    voice: 'dark',
+    bias: { bass: ['bass-acid', 'bass-deep-sub'], lead: ['pluck-fm', 'lead-square'], pad: ['pad-dream'], keys: ['keys-glass'] },
     scales: ['minor', 'phrygian', 'harmonicMinor'],
     harmony: {
       prog: [
@@ -450,6 +467,8 @@ export const STYLES: readonly StyleDef[] = [
 
   mk('trap', 'Trap', '陷阱说唱', Skull, '#FF9F1C', '半拍军鼓 · 十六分镲群 · 低音 808', {
     bpm: [138, 150],
+    voice: 'dark',
+    bias: { bass: ['bass-deep-sub'], keys: ['keys-glass', 'keys-epiano'], lead: ['lead-square', 'pluck-fm'], pad: ['pad-dream'] },
     scales: ['minorPent', 'phrygian', 'minor'],
     harmony: {
       prog: [
@@ -495,6 +514,8 @@ export const STYLES: readonly StyleDef[] = [
 
   mk('dnb', 'Drum & Bass', '鼓打贝斯', Gauge, '#39FF88', '170 BPM 切分鼓 · 长音 sub · 稀疏和声', {
     bpm: [168, 176],
+    voice: 'punchy',
+    bias: { bass: ['bass-growl', 'bass-deep-sub'], pad: ['pad-dream'], keys: ['keys-epiano', 'pluck-soft'], lead: ['lead-square'] },
     scales: ['minor', 'dorian', 'harmonicMinor'],
     harmony: {
       prog: [
@@ -540,6 +561,8 @@ export const STYLES: readonly StyleDef[] = [
 
   mk('rnb', 'R&B', '节奏蓝调', Heart, '#FF5CA8', '九和弦十一和弦 · 四声部平滑 · 留白旋律', {
     bpm: [84, 96],
+    voice: 'soft',
+    bias: { keys: ['keys-piano', 'keys-epiano'], bass: ['bass-growl'], pad: ['pad-warm'], lead: ['lead-bright', 'pluck-soft'], arp: ['pluck-fm'] },
     scales: ['minor', 'dorian', 'major'],
     harmony: {
       prog: [
@@ -583,6 +606,8 @@ export const STYLES: readonly StyleDef[] = [
 
   mk('funk', 'Funk', '放克', Blend, '#FFE600', '十六分切分 · 哇音自动滤波 · 密集 slap 贝斯', {
     bpm: [100, 112],
+    voice: 'punchy',
+    bias: { bass: ['bass-growl', 'bass-acid'], keys: ['keys-epiano', 'keys-organ'], lead: ['lead-saw'], pad: ['pad-warm'], arp: ['pluck-fm'] },
     scales: ['mixolydian', 'dorian', 'minorPent'],
     harmony: {
       prog: [
@@ -627,6 +652,9 @@ export const STYLES: readonly StyleDef[] = [
 
   mk('bossa', 'Bossa Nova', '巴萨诺瓦', TreePalm, '#39FF88', 'Clave 击键 · 大七九和弦 · 行走低音', {
     bpm: [126, 146],
+    voice: 'soft',
+    bias: { keys: ['keys-piano', 'keys-epiano'], lead: ['pluck-karplus', 'pluck-soft'], pad: ['pad-warm'], bass: ['bass-growl'] },
+    acousticBass: true,
     scales: ['major', 'lydian', 'majorPent'],
     harmony: {
       prog: [
@@ -671,6 +699,8 @@ export const STYLES: readonly StyleDef[] = [
 
   mk('afrobeat', 'Afrobeat', '非洲节拍', Sprout, '#FF9F1C', '交错铃律 · 五声马林巴 · 密集通鼓', {
     bpm: [100, 114],
+    voice: 'bright',
+    bias: { keys: ['keys-organ', 'keys-piano'], bass: ['bass-growl', 'bass-deep-sub'], lead: ['pluck-soft', 'pluck-karplus'], pad: ['pad-warm'] },
     scales: ['majorPent', 'mixolydian', 'major'],
     harmony: {
       prog: [
@@ -716,6 +746,9 @@ export const STYLES: readonly StyleDef[] = [
 
   mk('jazz-fusion', 'Jazz Fusion', '爵士融合', Martini, '#A78BFA', '多利亚九十一 · drop2 排列 · 行走低音', {
     bpm: [110, 128],
+    voice: 'soft',
+    bias: { keys: ['keys-epiano', 'keys-piano'], pad: ['pad-warm', 'pad-strings'], lead: ['pluck-soft', 'lead-square'], bass: ['bass-growl'] },
+    acousticBass: true,
     scales: ['dorian', 'mixolydian', 'minor', 'lydian'],
     harmony: {
       prog: [
@@ -761,6 +794,8 @@ export const STYLES: readonly StyleDef[] = [
 
   mk('rock', 'Rock', '摇滚', Guitar, '#FF3DBE', '强力和弦八分 · 直白大调 · 粗粝主音', {
     bpm: [112, 132],
+    voice: 'punchy',
+    bias: { bass: ['bass-growl'], lead: ['lead-saw', 'lead-bright'], keys: ['keys-organ', 'keys-piano'], pad: ['pad-warm'] },
     scales: ['mixolydian', 'minorPent', 'major'],
     harmony: {
       prog: [
@@ -806,6 +841,8 @@ export const STYLES: readonly StyleDef[] = [
 
   mk('punk', 'Punk', '朋克', Sparkles, '#00E5FF', '180 BPM 全八分 · 三和弦直给 · 齐诵式旋律', {
     bpm: [160, 190],
+    voice: 'bright',
+    bias: { bass: ['bass-growl'], lead: ['lead-square', 'lead-saw'], keys: ['keys-organ'] },
     scales: ['major', 'mixolydian', 'minor'],
     harmony: {
       prog: [
@@ -848,6 +885,8 @@ export const STYLES: readonly StyleDef[] = [
 
   mk('reggae', 'Reggae', '雷鬼', Leaf, '#39FF88', '一拍落 · 反拍吉他刺 · 深沉旋律贝斯', {
     bpm: [72, 88],
+    voice: 'soft',
+    bias: { bass: ['bass-deep-sub'], keys: ['keys-organ', 'keys-epiano'], lead: ['pluck-soft'], pad: ['pad-warm'] },
     scales: ['minorPent', 'major', 'mixolydian'],
     harmony: {
       prog: [
@@ -893,6 +932,8 @@ export const STYLES: readonly StyleDef[] = [
 
   mk('phonk', 'Phonk', '孟菲斯陷阱', CarFront, '#FF3DBE', '和声小调 · 极速 808 滑音 · 牛铃式通鼓', {
     bpm: [155, 170],
+    voice: 'dark',
+    bias: { bass: ['bass-deep-sub', 'bass-acid'], keys: ['keys-glass'], lead: ['lead-bright'], pad: ['pad-dream'] },
     scales: ['harmonicMinor', 'phrygian', 'minor'],
     harmony: {
       prog: [
@@ -937,6 +978,8 @@ export const STYLES: readonly StyleDef[] = [
 
   mk('future-bass', 'Future Bass', '未来贝斯', Waves, '#00E5FF', '大九和弦宽排列 · 侧链泵动 · 半拍鼓', {
     bpm: [140, 152],
+    voice: 'bright',
+    bias: { bass: ['bass-growl', 'bass-deep-sub'], lead: ['lead-saw'], pad: ['pad-warm', 'pad-dream'], keys: ['pluck-fm', 'keys-glass'] },
     scales: ['major', 'lydian', 'dorian'],
     harmony: {
       prog: [
@@ -983,6 +1026,8 @@ export const STYLES: readonly StyleDef[] = [
 
   mk('ambient', 'Ambient', '氛围音景', CloudFog, '#4D9FFF', '无鼓 · 长音铺底 · 大混响留白', {
     bpm: [60, 76],
+    voice: 'soft',
+    bias: { pad: ['pad-dream', 'pad-warm'], keys: ['keys-glass', 'keys-epiano'], arp: ['pluck-soft', 'pluck-karplus'], lead: ['pluck-soft'] },
     scales: ['major', 'lydian', 'dorian'],
     harmony: {
       prog: [
@@ -1023,6 +1068,8 @@ export const STYLES: readonly StyleDef[] = [
 
   mk('ballad', 'Piano Ballad', '钢琴叙事曲', Piano, '#A78BFA', '慢速抒情 · 分解和弦 · 长线条旋律', {
     bpm: [66, 80],
+    voice: 'soft',
+    bias: { keys: ['keys-piano', 'keys-epiano'], pad: ['pad-strings', 'pad-warm'], lead: ['pluck-soft', 'lead-bright'], bass: ['bass-deep-sub'] },
     scales: ['major', 'minor', 'lydian'],
     harmony: {
       prog: [
@@ -1067,6 +1114,8 @@ export const STYLES: readonly StyleDef[] = [
 
   mk('disco', 'Disco', '迪斯科', Disc3, '#FFE600', '四踩 + 反拍开镲 · 八度跳跃贝斯 · 弦乐刺', {
     bpm: [118, 126],
+    voice: 'bright',
+    bias: { bass: ['bass-growl'], keys: ['keys-epiano'], pad: ['pad-strings'], lead: ['lead-bright'], arp: ['pluck-fm'] },
     scales: ['minor', 'major', 'lydian', 'mixolydian'],
     harmony: {
       prog: [
@@ -1113,6 +1162,8 @@ export const STYLES: readonly StyleDef[] = [
 
   mk('uk-garage', 'UK Garage', '英式车库', RadioTower, '#A78BFA', '2-step 错位鼓 · 切分镲 · 液化和声', {
     bpm: [128, 136],
+    voice: 'bright',
+    bias: { keys: ['keys-epiano', 'keys-piano'], bass: ['bass-deep-sub', 'bass-growl'], pad: ['pad-warm'], lead: ['pluck-soft', 'lead-bright'] },
     scales: ['minor', 'dorian', 'major'],
     harmony: {
       prog: [
@@ -1158,6 +1209,8 @@ export const STYLES: readonly StyleDef[] = [
 
   mk('trip-hop', 'Trip-Hop', '迷幻嘻哈', MoonStar, '#4D9FFF', '拖拍慢鼓 · 阴暗九和弦 · 黑胶低通', {
     bpm: [80, 92],
+    voice: 'dark',
+    bias: { keys: ['keys-epiano', 'keys-glass'], bass: ['bass-deep-sub'], pad: ['pad-dream'], lead: ['pluck-fm'] },
     scales: ['minor', 'dorian'],
     harmony: {
       prog: [
@@ -1201,6 +1254,9 @@ export const STYLES: readonly StyleDef[] = [
 
   mk('gospel', 'Gospel', '福音', Church, '#FFE600', '变格终止 · 风琴四声部 · 行走低音', {
     bpm: [64, 78],
+    voice: 'bright',
+    bias: { keys: ['keys-organ', 'keys-piano'], pad: ['pad-warm', 'pad-strings'], lead: ['lead-bright'], arp: ['pluck-soft'], bass: ['bass-growl'] },
+    acousticBass: true,
     scales: ['major'],
     harmony: {
       prog: [
@@ -1246,6 +1302,8 @@ export const STYLES: readonly StyleDef[] = [
 
   mk('drill', 'Drill', '钻头说唱', Siren, '#FF3DBE', '和声小调 · 半拍军鼓 · 滑行 808', {
     bpm: [138, 146],
+    voice: 'dark',
+    bias: { bass: ['bass-deep-sub'], keys: ['keys-glass', 'pluck-fm'], pad: ['pad-dream'], lead: ['lead-bright'] },
     scales: ['harmonicMinor', 'phrygian', 'minor'],
     harmony: {
       prog: [
@@ -1292,6 +1350,8 @@ export const STYLES: readonly StyleDef[] = [
 
   mk('electric-blues', 'Electric Blues', '电布鲁斯', Flame, '#FF9F1C', '混利底亚属七 · 三连 shuffle · 行走boogie', {
     bpm: [74, 90],
+    voice: 'punchy',
+    bias: { keys: ['keys-organ', 'keys-epiano'], lead: ['lead-saw'], bass: ['bass-growl'] },
     scales: ['mixolydian'],
     harmony: {
       /* 12 小节近似：I–IV–I–V 循环，全部叠成属七（混利底亚的 I/IV/V 七和弦天然属七） */
@@ -1335,6 +1395,9 @@ export const STYLES: readonly StyleDef[] = [
 
   mk('country', 'Country Pop', '乡村流行', Wheat, '#39FF88', 'I–V–vi–IV · 火车节拍 · 班卓琶音', {
     bpm: [96, 118],
+    voice: 'bright',
+    bias: { keys: ['keys-piano'], lead: ['lead-bright'], arp: ['pluck-karplus'], pad: ['pad-warm'], bass: ['bass-growl'] },
+    acousticBass: true,
     scales: ['major', 'mixolydian'],
     harmony: {
       prog: [
@@ -1379,6 +1442,8 @@ export const STYLES: readonly StyleDef[] = [
 
   mk('samba', 'Samba', '桑巴', PartyPopper, '#FF5CA8', 'Clave 骨架 · 十六分沙锤 · 大九和弦', {
     bpm: [100, 108],
+    voice: 'bright',
+    bias: { keys: ['keys-piano', 'keys-epiano'], pad: ['pad-warm'], lead: ['pluck-karplus'], bass: ['bass-growl'] },
     scales: ['major', 'lydian', 'minor'],
     harmony: {
       prog: [
@@ -1425,6 +1490,8 @@ export const STYLES: readonly StyleDef[] = [
 
   mk('vaporwave', 'Vaporwave', '蒸气波', Sunset, '#A78BFA', '放慢混响 · 大七和弦垫 · 惰性反拍', {
     bpm: [70, 84],
+    voice: 'soft',
+    bias: { pad: ['pad-warm', 'pad-dream'], keys: ['keys-epiano', 'keys-glass'], bass: ['bass-deep-sub'], lead: ['lead-bright'] },
     scales: ['major', 'lydian'],
     harmony: {
       prog: [

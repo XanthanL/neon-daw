@@ -43,6 +43,10 @@ export function buildDrums(
   const out = {} as Record<DrumType, StepData[]>;
   const { velJitter, dropP } = style.humanize;
   const accents = new Set(style.accent);
+  /* 加密护栏：只有签名鼓格本身密集的流派才在强度高时补十六分 / 呼吸开镲；
+     叙事曲、雷鬼、爵士、氛围等稀疏风格保持稀疏 */
+  const hatDriven = (style.groove.closedHat?.length ?? 0) >= 8;
+  const openHatDriven = (style.groove.openHat?.length ?? 0) > 0;
 
   for (const dt of ALL_DRUMS) {
     const lane = blank(total);
@@ -64,8 +68,8 @@ export function buildDrums(
         lane[off + s] = { on: true, velocity: clampVel(v) };
       }
 
-      // 高密度档：闭镲补十六分 / 双八分，制造驱动感
-      if (dt === 'closedHat' && intensity >= 2) {
+      // 高密度档：闭镲补十六分 / 双八分，制造驱动感（仅镲驱动的流派）
+      if (dt === 'closedHat' && intensity >= 2 && hatDriven) {
         for (let s = 0; s < BAR_STEPS; s++) {
           if (lane[off + s].on) continue;
           const allow = intensity >= 3 ? s % 2 === 1 : s % 4 === 2;
@@ -73,8 +77,8 @@ export function buildDrums(
           lane[off + s] = { on: true, velocity: clampVel(BASE_VEL.closedHat - 18) };
         }
       }
-      // 满编档：每小节末尾补一个开镲呼吸
-      if (dt === 'openHat' && intensity >= 3 && !lane[off + 14].on) {
+      // 满编档：每小节末尾补一个开镲呼吸（仅当该风格本来就用开镲）
+      if (dt === 'openHat' && intensity >= 3 && openHatDriven && !lane[off + 14].on) {
         lane[off + 14] = { on: true, velocity: clampVel(BASE_VEL.openHat - 6) };
       }
     }
