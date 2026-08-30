@@ -26,6 +26,7 @@ import { useT } from '../../i18n/ui';
 import { exportProjectToFile, readProjectFile } from '../../utils/projectIO';
 import { DiscLogo } from './SideNav';
 import { EdgeScroll } from '../ui/EdgeScroll';
+import { ExpandStrip } from '../ui/ExpandStrip';
 import { IconButton } from '../ui/IconButton';
 import { Knob } from '../ui/Knob';
 import { LangToggle } from '../ui/LangToggle';
@@ -214,7 +215,7 @@ function BpmControl() {
 }
 
 /* ============================================================
- * Pattern 选择器（横向滚动 · 边界渐隐 · 手机与桌面同构）
+ * Pattern 选择器（桌面横向滚动 · 边界渐隐；手机收成按钮，点开铺平再选）
  * ============================================================ */
 
 function PatternSelect() {
@@ -224,35 +225,48 @@ function PatternSelect() {
   const setPatternManagerOpen = useUiStore((s) => s.setPatternManagerOpen);
   const t = useT();
   const openManager = () => setPatternManagerOpen(true);
+  /* 手机触发按钮空间窄，用 P{n} 短标；全名在展开面板 / 管理面板里看 */
+  const currentIdx = patterns.findIndex((p) => p.id === currentPatternId);
+
+  const pills = patterns.map((p) => {
+    const active = p.id === currentPatternId;
+    return (
+      <button
+        key={p.id}
+        type="button"
+        aria-pressed={active}
+        onClick={() => setCurrentPatternId(p.id)}
+        className={`shrink-0 cursor-pointer rounded-full border-2 border-ink px-3 py-1 text-xs font-bold whitespace-nowrap text-ink transition-all ${
+          active
+            ? 'bg-neon-cyan shadow-[2px_2px_0_#17171C,0_0_10px_rgba(0,229,255,0.6)]'
+            : 'bg-card shadow-hard-sm hover:-translate-y-0.5'
+        }`}
+      >
+        {p.name}
+      </button>
+    );
+  });
 
   return (
-    /* 整行只有一个可变宽度项（EdgeScroll：min-w-0 flex-1），其余控件 shrink-0，
-       窄屏下滚动条被压缩但靠左右渐隐提示「还有更多」，不会与相邻按钮重叠 */
+    /* 整行只有一个可变宽度项（min-w-0 flex-1），其余控件 shrink-0，不会与相邻按钮重叠 */
     <div className="flex min-w-0 flex-1 flex-col gap-1 md:flex-none">
       <span className="label-caps hidden md:block">{t.topbar.pattern}</span>
       <div className="flex min-w-0 items-center gap-1.5">
+        {/* 手机：触发按钮显示当前 Pattern，点一下悬挂铺平面板 */}
+        <ExpandStrip
+          dropdown
+          summary={`P${currentIdx + 1}`}
+          className="flex-1 md:hidden"
+          listClassName="gap-1.5"
+        >
+          {pills}
+        </ExpandStrip>
+        {/* 桌面：横向滚动 + 边界渐隐 */}
         <EdgeScroll
-          className="flex-1 md:max-w-[260px] md:flex-none"
+          className="hidden flex-1 md:block md:max-w-[260px] md:flex-none"
           listClassName="flex items-center gap-1.5"
         >
-          {patterns.map((p) => {
-            const active = p.id === currentPatternId;
-            return (
-              <button
-                key={p.id}
-                type="button"
-                aria-pressed={active}
-                onClick={() => setCurrentPatternId(p.id)}
-                className={`shrink-0 cursor-pointer rounded-full border-2 border-ink px-3 py-1 text-xs font-bold whitespace-nowrap text-ink transition-all ${
-                  active
-                    ? 'bg-neon-cyan shadow-[2px_2px_0_#17171C,0_0_10px_rgba(0,229,255,0.6)]'
-                    : 'bg-card shadow-hard-sm hover:-translate-y-0.5'
-                }`}
-              >
-                {p.name}
-              </button>
-            );
-          })}
+          {pills}
         </EdgeScroll>
         <IconButton label={t.topbar.manage} onClick={openManager}>
           <ListMusic />

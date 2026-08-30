@@ -20,6 +20,7 @@ import { useUiStore } from '../../stores/uiStore';
 import { useLang } from '../../i18n/lang';
 import { useT } from '../../i18n/ui';
 import type { Channel } from '../../types/project';
+import { ExpandStrip } from '../ui/ExpandStrip';
 import { OverlaySheet } from '../ui/OverlaySheet';
 import { SynthPanel } from './SynthPanel';
 
@@ -225,7 +226,7 @@ export function Synth() {
       {/* 合成器通道选择 */}
       <div className="flex shrink-0 items-center gap-2 border-b-2 border-ink/10 bg-bg-warm/60 px-3 py-2 md:px-4">
         <span className="label-caps hidden shrink-0 sm:inline">{t.synth.channel}</span>
-        <div className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto py-1">
+        <ExpandStrip summary={selected.name} className="min-w-0 flex-1" listClassName="gap-2">
           {synthChannels.map((c) => {
             const on = c.id === selected.id;
             return (
@@ -250,7 +251,7 @@ export function Synth() {
               </button>
             );
           })}
-        </div>
+        </ExpandStrip>
         {/* 手机端音色库入口（内容在浮层抽屉中） */}
         <button
           type="button"

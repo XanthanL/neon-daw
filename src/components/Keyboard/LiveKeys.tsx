@@ -15,6 +15,7 @@ import { useProjectStore } from '../../stores/projectStore';
 import { useUiStore } from '../../stores/uiStore';
 import { useT } from '../../i18n/ui';
 import type { Channel } from '../../types/project';
+import { ExpandStrip } from '../ui/ExpandStrip';
 
 const BLACK_SET = new Set([1, 3, 6, 8, 10]);
 const isBlackKey = (m: number) => BLACK_SET.has(((m % 12) + 12) % 12);
@@ -299,7 +300,7 @@ export function LiveKeys() {
       {/* 音色通道选择 */}
       <div className="flex items-center gap-2 border-b-2 border-ink/10 bg-bg-warm/60 px-3 py-2 md:px-4">
         <span className="label-caps hidden shrink-0 sm:inline">{t.liveKeys.preset}</span>
-        <div className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto py-1">
+        <ExpandStrip summary={selected.name} className="min-w-0 flex-1" listClassName="gap-2">
           {synthChannels.map((c) => {
             const on = c.id === selected.id;
             return (
@@ -330,7 +331,7 @@ export function LiveKeys() {
               </button>
             );
           })}
-        </div>
+        </ExpandStrip>
         {/* 八度移调 */}
         <div className="flex shrink-0 items-center gap-1">
           <button
@@ -371,14 +372,15 @@ export function LiveKeys() {
           }
         >
           {recordArmed ? <Mic className="h-4 w-4" /> : <Circle className="h-4 w-4" />}
-          {recordArmed ? t.liveKeys.recording : t.liveKeys.playOnly}
+          {/* 窄屏只留图标，把宽度让给通道选择触发按钮 */}
+          <span className="hidden sm:inline">{recordArmed ? t.liveKeys.recording : t.liveKeys.playOnly}</span>
         </motion.button>
       </div>
 
       {/* 预设快切（点击直接套用到当前通道） */}
       <div className="flex items-center gap-2 border-b-2 border-ink/10 bg-bg-warm/40 px-3 py-1.5 md:px-4">
         <Music2 className="h-4 w-4 shrink-0 text-ink/45" strokeWidth={2.4} />
-        <div className="flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto py-1">
+        <ExpandStrip summary={t.liveKeys.preset} className="min-w-0 flex-1" listClassName="gap-1.5">
           {SYNTH_PRESETS.map((p) => (
             <button
               key={p.id}
@@ -397,7 +399,7 @@ export function LiveKeys() {
               {p.name}
             </button>
           ))}
-        </div>
+        </ExpandStrip>
       </div>
 
       {/* 状态与循环位置 */}
