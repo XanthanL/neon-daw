@@ -98,7 +98,7 @@ export interface Channel {
   kind: 'drum' | 'synth';
   color: string; // 通道功能色（荧光家族 8 色）
   synthParams?: SynthParams; // kind === 'synth' 时存在（合成回退 / 编辑源）
-  /** kind === 'synth' 时可选：GM 采样乐器名（FluidR3_GM 文件夹），优先于合成器发声 */
+  /** kind === 'synth' 时可选：采样乐器名（public/samples 文件夹），优先于合成器发声 */
   sampleInstrument?: string;
   drumType?: DrumType; // kind === 'drum' 时存在
   drumParams?: DrumTuneParams; // kind === 'drum' 时的音高/衰减调音

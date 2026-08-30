@@ -2,6 +2,7 @@
  * 预下载 FluidR3_GM（CC-BY 3.0，经 gleitz/midi-js-soundfonts）逐键采样到 public/samples/。
  * 运行时改用本地 MIDI 号文件名（<midi>.mp3），彻底规避升/降号命名差异与 URL 里的 '#' 锚点问题，
  * 也不再实时跨域 GET（同源静态资源，快且可缓存）。
+ * （钢琴已升级为 Salamander v3 三层力度集，见 build-piano-salamander.mjs，不在此抓取。）
  *
  * 用法： node scripts/fetch-samples.mjs   （幂等：已存在且非空的文件跳过）
  */
@@ -14,9 +15,8 @@ const CDN = 'https://cdn.jsdelivr.net/gh/gleitz/midi-js-soundfonts@master/FluidR
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = join(ROOT, 'public', 'samples');
 
-/** 各乐器 + 需要覆盖的 MIDI 音域（钢琴给满键盘，其余按需，控制体积） */
+/** 各乐器 + 需要覆盖的 MIDI 音域（按需取键域，控制体积） */
 const PLAN = [
-  { inst: 'acoustic_grand_piano', lo: 21, hi: 108 }, // A0–C8 满键盘
   { inst: 'electric_piano_1', lo: 36, hi: 96 },
   { inst: 'acoustic_bass', lo: 24, hi: 55 },
   { inst: 'synth_strings_1', lo: 48, hi: 84 },

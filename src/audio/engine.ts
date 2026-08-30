@@ -432,7 +432,14 @@ export class AudioEngine {
   async noteOn(channelId: string, midi: number, velocity = 100): Promise<void> {
     await this.unlock();
     const nodes = this.channels.get(channelId);
-    if (!nodes?.poly) return;
+    if (!nodes) return;
+    const vel = Math.min(1, Math.max(0.01, velocity / 127));
+    // 采样延音优先；键未加载则后台补载并回退合成器（本次仍出声）
+    if (nodes.sample) {
+      if (nodes.sample.attack(midi, Tone.now() + 0.01, vel)) return;
+      void nodes.sample.prepare([midi]);
+    }
+    if (!nodes.poly) return;
     const p = useProjectStore.getState().channels.find((c) => c.id === channelId)
       ?.synthParams;
     const semis = (p?.osc1Octave ?? 0) * 12 + (p?.osc2Detune ?? 0) / 100;
@@ -443,16 +450,13 @@ export class AudioEngine {
       this.heldFreqs.set(channelId, held);
     }
     held.set(midi, freq);
-    nodes.poly.triggerAttack(
-      freq,
-      Tone.now() + 0.01,
-      Math.min(1, Math.max(0.01, velocity / 127)),
-    );
+    nodes.poly.triggerAttack(freq, Tone.now() + 0.01, vel);
   }
 
-  /** 虚拟键盘松开（精准 release 对应发声频率） */
+  /** 虚拟键盘松开（采样延音与合成器都精准 release） */
   noteOff(channelId: string, midi: number): void {
     const nodes = this.channels.get(channelId);
+    nodes?.sample?.release(midi);
     const held = this.heldFreqs.get(channelId);
     if (!held) return;
     const freq = held.get(midi);

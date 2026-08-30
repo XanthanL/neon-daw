@@ -79,12 +79,15 @@ src/
 
 ## 音色来源
 
-NeonDAW 是混合乐器：鼓为实时合成（808 味，可调音高/衰减）；lead / pluck 用内置双振荡合成器；**钢琴 / keys / bass / pad 用真实采样，已预打包到本地 `public/samples/`**（由 `scripts/fetch-samples.mjs` 一次性抓取，FluidR3_GM，CC-BY 3.0），运行时同源加载、不再实时跨域取 CDN；按 MIDI 号命名，黑键也齐全；取不到时自动回退合成器——永不静音。
+NeonDAW 是混合乐器：鼓为实时合成（808 味，可调音高/衰减）；lead / pluck 用内置双振荡合成器；**钢琴 / keys / bass / pad 用真实采样，已预打包到本地 `public/samples/`**，运行时同源加载、不再实时跨域取 CDN。**钢琴为 Salamander Grand Piano v3（Yamaha C5）**，经 `scripts/build-piano-salamander.mjs` 转成逐键**三层力度**采样（`piano/soft|mid|hard/<midi>.mp3`）——重击清脆、轻触温柔；其余乐器为 FluidR3_GM（`scripts/fetch-samples.mjs` 抓取）。文件按 MIDI 号命名，黑键也齐全；取不到时先回退相邻力度层，再回退合成器——永不静音。
 
 ## 许可
 
 MIT © NeonDAW contributors。
 
-乐器采样为 **FluidR3_GM**，© Frank Neff，经
-[`gleitz/midi-js-soundfonts`](https://github.com/gleitz/midi-js-soundfonts) 以
-**CC-BY 3.0** 分发。
+乐器采样署名：
+
+- **钢琴**：[Salamander Grand Piano v3](https://sfzinstruments.github.io/pianos/salamander)，作者 Alexander Holm（Yamaha C5），**CC-BY 3.0**；逐键转换脚本见 [`scripts/build-piano-salamander.mjs`](scripts/build-piano-salamander.mjs)。
+- **其余乐器**：**FluidR3_GM**，© Frank Neff，经
+  [`gleitz/midi-js-soundfonts`](https://github.com/gleitz/midi-js-soundfonts) 以
+  **CC-BY 3.0** 分发。

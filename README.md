@@ -83,12 +83,15 @@ NeonDAW is a hybrid instrument:
 
 - **Drums** are synthesized live (808-style `MembraneSynth` / `NoiseSynth` / `MetalSynth`) — zero assets, fully tweakable (tune / decay).
 - **Leads / plucks** are the built-in dual-oscillator synth, so the Synth module's knobs actually do something.
-- **Piano, keys, bass and pads** play real sampled instruments, **pre-bundled locally** under `public/samples/` (fetched once via `scripts/fetch-samples.mjs`) and loaded same-origin — no runtime cross-origin CDN calls, so first playback is instant and offline-friendly. Files are keyed by MIDI number, so every black key is covered too. If a sample can't load, the voice silently falls back to the synthesizer — a note is never dropped.
+- **Piano, keys, bass and pads** play real sampled instruments, **pre-bundled locally** under `public/samples/` and loaded same-origin — no runtime cross-origin CDN calls, so first playback is instant and offline-friendly. The **grand piano is Salamander Grand Piano v3** (Yamaha C5), converted into a per-note, **3-velocity-layer** set (`piano/soft|mid|hard/<midi>.mp3`) so hard hits are crisp and soft hits are mellow; the rest come from FluidR3_GM (fetched via `scripts/fetch-samples.mjs`). Files are keyed by MIDI number, so every black key is covered too. If a sample can't load, the voice silently falls back to an adjacent layer, then to the synthesizer — a note is never dropped.
 
 ## License
 
 MIT © NeonDAW contributors.
 
-Instrument samples are **FluidR3_GM**, © Frank Neff, redistributed via
-[`gleitz/midi-js-soundfonts`](https://github.com/gleitz/midi-js-soundfonts) under
-**CC-BY 3.0**.
+Instrument samples:
+
+- **Piano**: [Salamander Grand Piano v3](https://sfzinstruments.github.io/pianos/salamander) by Alexander Holm (Yamaha C5), **CC-BY 3.0**; converted per-note with [`scripts/build-piano-salamander.mjs`](scripts/build-piano-salamander.mjs).
+- **Other instruments**: **FluidR3_GM**, © Frank Neff, redistributed via
+  [`gleitz/midi-js-soundfonts`](https://github.com/gleitz/midi-js-soundfonts) under
+  **CC-BY 3.0**.
