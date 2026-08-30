@@ -5,7 +5,7 @@
  * · 抽卡会重置工程内全部安排（Pattern / 音符 / 音色 / 混音 / Song 编排），
  *   但会记录一步历史，生成后 Ctrl+Z 即可回到上一首
  * · 生成后自动切到 Song 模式播放试听
- * · 桌面两侧是和声轨 / 音符雨实时可视化；移动端同款降级为卡片下的横条 + 雨幕
+ * · 桌面两侧是和声轨 / 节奏挑战实时可视化；移动端同款降级为卡片下的横条 + 游戏模块
  */
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -32,7 +32,7 @@ import { generateRandomSong, MIN_PATTERNS, MAX_PATTERNS } from '../../utils/musi
 import { STYLES } from '../../utils/music/styles';
 import type { GeneratedInfo, StyleId } from '../../utils/music/types';
 import { ChordStream } from './ChordStream';
-import { NoteRain } from './NoteRain';
+import { RhythmGame } from './RhythmGame';
 
 const ROLL_FRAMES = [Dices, Dice5, Dice6, Sparkles, Drum, Piano, Guitar, Disc3];
 
@@ -186,7 +186,7 @@ export function RandomDraw() {
     <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
       <div className="mx-auto flex w-full max-w-[1380px] flex-1 items-stretch gap-3 p-3 md:p-4 lg:gap-4">
         {/* 桌面左栏：和声轨（当前和弦居中跟随播放头） */}
-        <aside className="card-sandwich hidden w-[250px] shrink-0 flex-col p-3 lg:flex">
+        <aside className="card-sandwich sticky top-3 hidden h-[520px] w-[250px] shrink-0 flex-col self-start p-3 lg:flex">
           <div className="label-caps mb-1.5 flex items-center gap-1.5">
             <ListMusic className="h-3.5 w-3.5" strokeWidth={2.6} />
             {t.random.vizChords}
@@ -281,10 +281,10 @@ export function RandomDraw() {
             </div>
             <div className="label-caps flex items-center gap-1.5 px-0.5">
               <AudioWaveform className="h-3.5 w-3.5" strokeWidth={2.6} />
-              {t.random.vizRain}
+              {t.random.rhythm}
             </div>
-            <div className="flex h-36">
-              <NoteRain viz={viz} />
+            <div className="flex h-72">
+              <RhythmGame viz={viz} />
             </div>
           </section>
 
@@ -306,13 +306,13 @@ export function RandomDraw() {
           </div>
         </main>
 
-        {/* 桌面右栏：音符雨 + 鼓垫 + 频谱 */}
-        <aside className="card-sandwich hidden w-[280px] shrink-0 flex-col p-3 lg:flex">
+        {/* 桌面右栏：节奏挑战（旋律 4 轨下落，DFJK 击打） */}
+        <aside className="card-sandwich sticky top-3 hidden h-[520px] w-[280px] shrink-0 flex-col self-start p-3 lg:flex">
           <div className="label-caps mb-1.5 flex items-center gap-1.5">
             <AudioWaveform className="h-3.5 w-3.5" strokeWidth={2.6} />
-            {t.random.vizRain}
+            {t.random.rhythm}
           </div>
-          <NoteRain viz={viz} />
+          <RhythmGame viz={viz} />
         </aside>
       </div>
     </div>

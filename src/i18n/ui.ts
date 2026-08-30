@@ -216,6 +216,13 @@ const en = {
     vizChords: 'Harmony stream',
     vizRain: 'Note rain',
     vizIdle: 'Draw a song — its chords and notes will play out right here',
+    rhythm: 'Rhythm challenge',
+    rhythmStart: 'Start performance',
+    rhythmHint: 'Melody falls to 4 lanes — hit with D F J K (tap lanes on mobile)',
+    accuracy: 'Accuracy',
+    maxCombo: 'Max combo',
+    again2: 'Play again',
+    close: 'Back',
   },
 
   files: {
@@ -489,6 +496,13 @@ const zh: Dict = {
     vizChords: '和声轨',
     vizRain: '音符雨',
     vizIdle: '抽一首歌，它的和声与音符会在这里流动起来',
+    rhythm: '节奏挑战',
+    rhythmStart: '开始演奏',
+    rhythmHint: '旋律化作 4 轨下落音符 —— 电脑按 D F J K，手机直接点按轨道',
+    accuracy: '准度',
+    maxCombo: '最大连击',
+    again2: '再来一局',
+    close: '返回',
   },
 
   files: {

@@ -82,3 +82,54 @@ export const KIT_COLOR: Record<DrumType, string> = {
   openHat: '#A78BFA',
   tom: '#4D9FFF',
 };
+
+/* ============================================================
+ * 节奏玩法：主旋律 → 4 轨下落音符
+ * ============================================================ */
+
+export interface RhythmNote {
+  abs: number;
+  len: number;
+  lane: number;
+  pitch: number;
+  vel: number;
+}
+
+/** 主旋律声部优先级：lead 最像“歌”，缺 lead 时逐级回退 */
+const MELODY_PRIORITY: RoleId[] = ['lead', 'arp', 'keys', 'bass'];
+
+export function buildRhythmNotes(viz: VizSong | null): RhythmNote[] {
+  if (!viz) return [];
+  let picked: { step: number; pitch: number; len: number; vel: number }[] = [];
+  for (const role of MELODY_PRIORITY) {
+    picked = [];
+    for (const sec of viz.sections) {
+      const base = sec.startBar * 16;
+      for (const n of sec.notes) if (n.role === role) picked.push({ step: base + n.step, pitch: n.pitch, len: n.len, vel: n.vel });
+    }
+    if (picked.length >= 12) break;
+  }
+  if (!picked.length) return [];
+  /* 同一拍点只留最高的一音（keys 柱式会多音同拍） */
+  const byStep = new Map<number, { step: number; pitch: number; len: number; vel: number }>();
+  for (const n of picked) {
+    const prev = byStep.get(n.step);
+    if (!prev || n.pitch > prev.pitch) byStep.set(n.step, n);
+  }
+  const uniq = [...byStep.values()].sort((a, b) => a.step - b.step);
+  let lo = 127;
+  let hi = 0;
+  for (const n of uniq) {
+    if (n.pitch < lo) lo = n.pitch;
+    if (n.pitch > hi) hi = n.pitch;
+  }
+  const span = Math.max(1, hi - lo + 1);
+  return uniq.map((n) => ({
+    abs: n.step,
+    len: n.len,
+    vel: n.vel,
+    pitch: n.pitch,
+    lane: Math.max(0, Math.min(3, Math.floor(((n.pitch - lo) / span) * 4))),
+  }));
+}
+
