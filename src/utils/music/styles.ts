@@ -1,5 +1,5 @@
 /**
- * 风格池：20 种命名风格（一次抽卡抽中一种）
+ * 风格池：28 种命名风格（一次抽卡抽中一种）
  *
  * 采用「BASE 默认值 + 局部覆盖」压缩数据量；每种风格至少与邻居在
  * bpm / 调式 / 扩展音密度 / 鼓格 / 贝斯音型 / 曲式 中的三项以上不同。
@@ -9,23 +9,31 @@ import {
   Blend,
   Building2,
   CarFront,
+  Church,
   CloudFog,
   Coffee,
   Cpu,
   Disc3,
+  Flame,
   Gauge,
   Guitar,
   Heart,
   House,
   Leaf,
   Martini,
+  MoonStar,
+  PartyPopper,
   Piano,
+  RadioTower,
+  Siren,
   Skull,
   Sparkles,
   Sprout,
+  Sunset,
   Sunrise,
   TreePalm,
   Waves,
+  Wheat,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { PresetCategoryId } from '../../audio/synthPresets';
@@ -1102,11 +1110,367 @@ export const STYLES: readonly StyleDef[] = [
     },
     humanize: { velJitter: 5, dropP: 0.08 },
   }),
+
+  mk('uk-garage', 'UK Garage', '英式车库', RadioTower, '#A78BFA', '2-step 错位鼓 · 切分镲 · 液化和声', {
+    bpm: [128, 136],
+    scales: ['minor', 'dorian', 'major'],
+    harmony: {
+      prog: [
+        [0, 5, 3, 4],
+        [5, 3, 0, 4],
+        [0, 3, 6, 4],
+      ],
+      cadence: 'vamp',
+      ext: [0.45, 0.4, 0.05],
+      voicing: 'drop2',
+      inversionP: 0.4,
+      compRhythm: [0, 3, 10],
+      sustainSteps: 3,
+    },
+    melody: { register: [60, 81], perBar: [2, 5], restP: 0.3, leapMax: 3, syncP: 0.4, endTarget: 'third' },
+    bass: { idiom: 'syncopated', steps: [0, 6, 10], register: [28, 41], octaveJumpP: 0.2 },
+    groove: {
+      /* 2-step：底鼓落 1 与第 3 拍后半，军鼓 2/4 拍，镲走三连感 shuffle 格 */
+      kick: [0, 10],
+      snare: [4, 12],
+      clap: [7],
+      closedHat: [0, 2, 3, 6, 8, 10, 11, 14],
+      openHat: [15],
+      tom: [],
+    },
+    accent: [0, 3, 10, 12],
+    usesDrums: ['kick', 'snare', 'clap', 'closedHat', 'openHat'],
+    roles: [
+      BASS_ROLE,
+      r('keys', ['keys', 'pluck'], [55, 76], ALL_SEC),
+      r('pad', ['pad'], [50, 69], ['Verse', 'Chorus', 'Outro']),
+      r('lead', ['lead', 'pluck'], [62, 83], ['PreChorus', 'Chorus', 'Bridge']),
+    ],
+    form: [f('Intro', 4), f('Verse', 8), f('PreChorus', 4), f('Chorus', 8, 2), f('Outro', 4)],
+    fx: {
+      keys: [rev(1.9, 0.24), dly(0.28, 0.24, 0.18)],
+      pad: [rev(3.4, 0.44), F('stereoWidener', { width: 0.75 })],
+      lead: [rev(2.6, 0.3), dly(0.21, 0.3, 0.22)],
+      master: [F('compressor', { threshold: -15, knee: 6, ratio: 4, attack: 0.003, release: 0.11 }), F('limiter', { threshold: -1 })],
+    },
+    humanize: { velJitter: 7, dropP: 0.16 },
+  }),
+
+  mk('trip-hop', 'Trip-Hop', '迷幻嘻哈', MoonStar, '#4D9FFF', '拖拍慢鼓 · 阴暗九和弦 · 黑胶低通', {
+    bpm: [80, 92],
+    scales: ['minor', 'dorian'],
+    harmony: {
+      prog: [
+        [0, 5, 3, 4],
+        [0, 3, 5, 4],
+      ],
+      cadence: 'vamp',
+      ext: [0.4, 0.42, 0.06],
+      voicing: 'close',
+      inversionP: 0.3,
+      compRhythm: [0, 8],
+      sustainSteps: 8,
+    },
+    melody: { register: [57, 76], perBar: [2, 4], restP: 0.42, leapMax: 2, syncP: 0.3, endTarget: 'third' },
+    bass: { idiom: 'subLong', steps: [0], register: [26, 38], octaveJumpP: 0 },
+    groove: {
+      kick: [0, 6, 10],
+      snare: [4, 12],
+      closedHat: [2, 6, 10, 14],
+      openHat: [14],
+      tom: [15],
+    },
+    accent: [0, 4, 10],
+    fill: [12, 14, 15],
+    usesDrums: ['kick', 'snare', 'closedHat', 'openHat', 'tom'],
+    roles: [
+      BASS_ROLE,
+      r('keys', ['keys', 'pluck'], [52, 72], ALL_SEC),
+      r('pad', ['pad'], [48, 65], ['Verse', 'Chorus', 'Bridge', 'Outro']),
+      r('lead', ['lead'], [60, 79], ['Chorus', 'Bridge']),
+    ],
+    form: [f('Intro', 4), f('Verse', 8), f('Chorus', 8, 2), f('Bridge', 4), f('Outro', 4)],
+    fx: {
+      keys: [rev(2.8, 0.34)],
+      pad: [rev(4.2, 0.5)],
+      lead: [rev(3.2, 0.4), dly(0.375, 0.3, 0.24)],
+      master: [F('filter', { type: 0, frequency: 3600, q: 0.4 }), F('limiter', { threshold: -2 })],
+    },
+    humanize: { velJitter: 12, dropP: 0.22 },
+  }),
+
+  mk('gospel', 'Gospel', '福音', Church, '#FFE600', '变格终止 · 风琴四声部 · 行走低音', {
+    bpm: [64, 78],
+    scales: ['major'],
+    harmony: {
+      prog: [
+        [0, 3, 4, 0],
+        [5, 3, 0, 4],
+        [0, 5, 3, 4],
+      ],
+      cadence: 'plagal',
+      ext: [0.5, 0.42, 0.12],
+      voicing: 'fourVoice',
+      inversionP: 0.5,
+      compRhythm: QUARTERS,
+      sustainSteps: 4,
+    },
+    melody: { register: [62, 83], perBar: [3, 6], restP: 0.18, leapMax: 3, syncP: 0.42, endTarget: 'tonic' },
+    bass: { idiom: 'walk', steps: QUARTERS, register: [28, 41], octaveJumpP: 0.1 },
+    groove: {
+      kick: [0, 8],
+      snare: [4, 12],
+      clap: [4, 12],
+      closedHat: EIGHTHS,
+      tom: [],
+    },
+    accent: [0, 4, 8, 12],
+    fill: [12, 13, 14, 15],
+    usesDrums: ['kick', 'snare', 'clap', 'closedHat'],
+    roles: [
+      BASS_ROLE,
+      r('keys', ['keys'], [52, 74], ALL_SEC),
+      r('pad', ['pad'], [50, 69], ['Verse', 'Chorus', 'Bridge', 'Outro']),
+      r('lead', ['lead', 'keys'], [64, 84], ['PreChorus', 'Chorus', 'Bridge']),
+      r('arp', ['pluck'], [69, 88], ['Chorus', 'Bridge'], 1),
+    ],
+    form: [f('Intro', 4), f('Verse', 8), f('PreChorus', 4), f('Chorus', 8, 2), f('Bridge', 4), f('Outro', 4)],
+    fx: {
+      keys: [F('chorus', { frequency: 0.8, delayTime: 0.005, depth: 0.5, wet: 0.28 }), rev(2.2, 0.26)],
+      pad: [rev(3.4, 0.42)],
+      lead: [rev(2.4, 0.28)],
+      master: [F('limiter', { threshold: -1 })],
+    },
+    humanize: { velJitter: 9, dropP: 0.1 },
+  }),
+
+  mk('drill', 'Drill', '钻头说唱', Siren, '#FF3DBE', '和声小调 · 半拍军鼓 · 滑行 808', {
+    bpm: [138, 146],
+    scales: ['harmonicMinor', 'phrygian', 'minor'],
+    harmony: {
+      prog: [
+        [0, 5, 3, 4],
+        [0, 1, 5, 4],
+        [0, 3, 6, 5],
+      ],
+      cadence: 'vamp',
+      ext: [0.3, 0.2, 0],
+      voicing: 'close',
+      inversionP: 0.2,
+      compRhythm: [0],
+      sustainSteps: 12,
+    },
+    melody: { register: [57, 74], perBar: [3, 6], restP: 0.22, leapMax: 2, syncP: 0.5, endTarget: 'third' },
+    bass: { idiom: 'slide88', steps: [0, 8, 11], register: [26, 39], octaveJumpP: 0.1 },
+    groove: {
+      /* 半拍骨架：军鼓落第 3 拍，镲走跳字十六分 */
+      kick: [0, 7, 10],
+      snare: [8],
+      clap: [],
+      closedHat: [0, 2, 4, 6, 8, 11, 12, 14],
+      openHat: [],
+      tom: [15],
+    },
+    accent: [0, 7, 10],
+    fill: [13, 14, 15],
+    usesDrums: ['kick', 'snare', 'closedHat', 'tom'],
+    roles: [
+      BASS_ROLE,
+      r('keys', ['pluck', 'keys'], [52, 70], ['Verse', 'PreChorus', 'Chorus', 'Bridge', 'Outro']),
+      r('pad', ['pad'], [46, 62], ['Chorus', 'Bridge']),
+      r('lead', ['lead'], [60, 78], ['PreChorus', 'Chorus']),
+    ],
+    form: [f('Intro', 4), f('Verse', 8), f('PreChorus', 4), f('Chorus', 8, 2), f('Outro', 4)],
+    fx: {
+      keys: [rev(2.6, 0.3)],
+      pad: [rev(3.8, 0.44)],
+      lead: [rev(2.2, 0.26), dly(0.19, 0.28, 0.2)],
+      master: [F('compressor', { threshold: -14, knee: 6, ratio: 4, attack: 0.003, release: 0.12 }), F('limiter', { threshold: -1 })],
+    },
+    humanize: { velJitter: 6, dropP: 0.1 },
+  }),
+
+  mk('electric-blues', 'Electric Blues', '电布鲁斯', Flame, '#FF9F1C', '混利底亚属七 · 三连 shuffle · 行走boogie', {
+    bpm: [74, 90],
+    scales: ['mixolydian'],
+    harmony: {
+      /* 12 小节近似：I–IV–I–V 循环，全部叠成属七（混利底亚的 I/IV/V 七和弦天然属七） */
+      prog: [
+        [0, 0, 3, 4],
+        [0, 3, 0, 4],
+      ],
+      cadence: 'vamp',
+      ext: [0.8, 0.08, 0],
+      voicing: 'close',
+      inversionP: 0.15,
+      compRhythm: [0, 6, 11],
+      sustainSteps: 3,
+    },
+    melody: { register: [60, 79], perBar: [3, 6], restP: 0.2, leapMax: 3, syncP: 0.45, endTarget: 'tonic' },
+    bass: { idiom: 'walk', steps: [0, 3, 6, 8, 11, 14], register: [28, 42], octaveJumpP: 0.15 },
+    groove: {
+      /* shuffle 三连感：镲走 12/8 格（0,3,4,7,8,11…） */
+      kick: [0, 8],
+      snare: [4, 12],
+      closedHat: [0, 3, 4, 7, 8, 11, 12, 15],
+      openHat: [],
+      tom: [],
+    },
+    accent: [0, 3, 8, 11],
+    fill: [12, 14, 15],
+    usesDrums: ['kick', 'snare', 'closedHat', 'tom'],
+    roles: [
+      BASS_ROLE,
+      r('lead', ['lead', 'keys'], [62, 81], ['Verse', 'PreChorus', 'Chorus', 'Bridge']),
+      r('keys', ['keys', 'pluck'], [52, 72], ['Chorus', 'Bridge']),
+    ],
+    form: [f('Intro', 4), f('Verse', 8), f('Chorus', 8, 2), f('Outro', 4)],
+    fx: {
+      lead: [F('phaser', { frequency: 0.4, octaves: 2.5, wet: 0.3 }), dly(0.25, 0.24, 0.18)],
+      keys: [rev(1.8, 0.2)],
+      master: [F('compressor', { threshold: -16, knee: 10, ratio: 3, attack: 0.006, release: 0.15 }), F('limiter', { threshold: -1 })],
+    },
+    humanize: { velJitter: 11, dropP: 0.14 },
+  }),
+
+  mk('country', 'Country Pop', '乡村流行', Wheat, '#39FF88', 'I–V–vi–IV · 火车节拍 · 班卓琶音', {
+    bpm: [96, 118],
+    scales: ['major', 'mixolydian'],
+    harmony: {
+      prog: [
+        [0, 4, 5, 3],
+        [0, 3, 4, 4],
+        [5, 3, 0, 4],
+      ],
+      cadence: 'authentic',
+      ext: [0.12, 0.05, 0],
+      voicing: 'close',
+      inversionP: 0.15,
+      compRhythm: [0, 4, 8, 12],
+      sustainSteps: 4,
+    },
+    melody: { register: [62, 81], perBar: [3, 5], restP: 0.2, leapMax: 4, syncP: 0.2, endTarget: 'tonic' },
+    bass: { idiom: 'root8th', steps: [0, 4, 8, 12], register: [28, 41], octaveJumpP: 0.6 },
+    groove: {
+      kick: [0, 8],
+      snare: [4, 12],
+      closedHat: EIGHTHS,
+      openHat: [],
+      tom: [],
+    },
+    accent: [0, 4, 8, 12],
+    fill: [12, 13, 14, 15],
+    usesDrums: ['kick', 'snare', 'closedHat', 'tom'],
+    roles: [
+      BASS_ROLE,
+      r('keys', ['pluck', 'keys'], [55, 76], ALL_SEC),
+      r('arp', ['pluck'], [67, 88], ['Verse', 'Chorus', 'Outro']),
+      r('lead', ['pluck', 'lead'], [64, 83], ['PreChorus', 'Chorus', 'Bridge']),
+    ],
+    form: [f('Intro', 4), f('Verse', 8), f('PreChorus', 4), f('Chorus', 8, 2), f('Bridge', 4), f('Outro', 4)],
+    fx: {
+      keys: [rev(1.6, 0.16)],
+      arp: [dly(0.14, 0.22, 0.18)],
+      lead: [rev(2, 0.22)],
+      master: [F('limiter', { threshold: -1 })],
+    },
+    humanize: { velJitter: 7, dropP: 0.08 },
+  }),
+
+  mk('samba', 'Samba', '桑巴', PartyPopper, '#FF5CA8', 'Clave 骨架 · 十六分沙锤 · 大九和弦', {
+    bpm: [100, 108],
+    scales: ['major', 'lydian', 'minor'],
+    harmony: {
+      prog: [
+        [0, 5, 3, 4],
+        [0, 3, 0, 4],
+        [5, 4, 3, 0],
+      ],
+      cadence: 'authentic',
+      ext: [0.45, 0.42, 0.04],
+      voicing: 'drop2',
+      inversionP: 0.35,
+      compRhythm: [0, 3, 6, 10, 12],
+      sustainSteps: 2,
+    },
+    melody: { register: [62, 85], perBar: [3, 6], restP: 0.16, leapMax: 5, syncP: 0.45, endTarget: 'third' },
+    bass: { idiom: 'offbeat', steps: [0, 4, 7, 8, 12, 15], register: [28, 42], octaveJumpP: 0.1 },
+    groove: {
+      /* 3-2 son clave 落军鼓，底鼓踩 2/4 拍加十六分 anticipação */
+      kick: [4, 12, 14],
+      snare: [0, 3, 6, 10, 12],
+      clap: [],
+      closedHat: SIXTEENTHS,
+      openHat: [],
+      tom: [1, 2, 5, 9, 13],
+    },
+    accent: [0, 3, 6, 10, 12, 14],
+    fill: [12, 13, 14, 15],
+    usesDrums: ['kick', 'snare', 'closedHat', 'tom'],
+    roles: [
+      BASS_ROLE,
+      r('keys', ['keys', 'pluck'], [55, 76], ALL_SEC),
+      r('pad', ['pad'], [50, 69], ['Chorus', 'Outro']),
+      r('lead', ['lead', 'pluck'], [64, 86], ['Verse', 'PreChorus', 'Chorus', 'Bridge']),
+    ],
+    form: [f('Intro', 4), f('Verse', 8), f('Chorus', 8, 2), f('Bridge', 4), f('Outro', 4)],
+    fx: {
+      keys: [rev(1.9, 0.22)],
+      pad: [rev(2.8, 0.34)],
+      lead: [rev(2.2, 0.26)],
+      master: [F('limiter', { threshold: -1 })],
+    },
+    humanize: { velJitter: 8, dropP: 0.12 },
+  }),
+
+  mk('vaporwave', 'Vaporwave', '蒸气波', Sunset, '#A78BFA', '放慢混响 · 大七和弦垫 · 惰性反拍', {
+    bpm: [70, 84],
+    scales: ['major', 'lydian'],
+    harmony: {
+      prog: [
+        [3, 0, 5, 4],
+        [0, 3, 4, 0],
+        [5, 3, 0, 4],
+      ],
+      cadence: 'plagal',
+      ext: [0.45, 0.48, 0.04],
+      voicing: 'spread',
+      inversionP: 0.4,
+      compRhythm: [0, 8],
+      sustainSteps: 8,
+    },
+    melody: { register: [60, 77], perBar: [2, 3], restP: 0.46, leapMax: 3, syncP: 0.15, endTarget: 'third' },
+    bass: { idiom: 'offbeat', steps: [2, 6, 10, 14], register: [28, 40], octaveJumpP: 0.08 },
+    groove: {
+      kick: [0, 8],
+      snare: [8],
+      closedHat: [2, 6, 10, 14],
+      openHat: [14],
+      tom: [],
+    },
+    accent: [0, 8],
+    fill: [12, 14],
+    usesDrums: ['kick', 'snare', 'closedHat', 'openHat'],
+    roles: [
+      BASS_ROLE,
+      r('pad', ['pad'], [48, 68], ALL_SEC),
+      r('keys', ['keys'], [57, 76], ['Verse', 'Chorus', 'Outro']),
+      r('lead', ['lead', 'keys'], [62, 80], ['Chorus', 'Bridge']),
+    ],
+    form: [f('Intro', 8), f('Verse', 8), f('Chorus', 8, 2), f('Outro', 8)],
+    fx: {
+      pad: [rev(5, 0.58), F('stereoWidener', { width: 0.95 })],
+      keys: [rev(3.6, 0.44), F('chorus', { frequency: 0.6, delayTime: 0.008, depth: 0.6, wet: 0.4 })],
+      lead: [rev(4.4, 0.5)],
+      master: [F('filter', { type: 0, frequency: 3200, q: 0.3 }), F('limiter', { threshold: -3 })],
+    },
+    humanize: { velJitter: 10, dropP: 0.26 },
+  }),
 ];
 
 /**
  * 抽一种风格；传入上次 id 可避免连抽同一种。
- * 均匀分布 + 排除上一次 → 20 种都有机会，且不会连续重复。
+ * 均匀分布 + 排除上一次 → 28 种都有机会，且不会连续重复。
  */
 export function drawStyle(rng: Rng, excludeId?: StyleId | null): StyleDef {
   const pool = excludeId ? STYLES.filter((s) => s.id !== excludeId) : [...STYLES];

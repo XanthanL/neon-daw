@@ -213,6 +213,9 @@ const en = {
       `Each draw picks one of ${n} named styles, then builds a full project from that style’s key, harmony, groove, motif development and form.`,
     resetNote: 'Resets the whole arrangement and switches to Song mode — Ctrl+Z undoes this draw.',
     warning: 'A draw replaces everything in the current project (patterns / notes / sounds / mix / arrangement). Export your project JSON from module 8 “Files” to keep it.',
+    vizChords: 'Harmony stream',
+    vizRain: 'Note rain',
+    vizIdle: 'Draw a song — its chords and notes will play out right here',
   },
 
   files: {
@@ -483,6 +486,9 @@ const zh: Dict = {
     intro: (n) => `一次抽卡从 ${n} 种命名风格里随机落一个，按该风格的调式、和声进行、鼓组音型、动机发展与曲式生成完整工程。`,
     resetNote: '已重置全部编排并切到 Song 模式 —— Ctrl+Z 可撤销这次抽卡回到上一首',
     warning: '抽卡会重置当前工程的所有安排（Pattern / 音符 / 音色 / 混音 / 编排）。想长期保留作品请先到键 8「Files」导出工程 JSON。',
+    vizChords: '和声轨',
+    vizRain: '音符雨',
+    vizIdle: '抽一首歌，它的和声与音符会在这里流动起来',
   },
 
   files: {

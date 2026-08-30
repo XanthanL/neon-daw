@@ -5,17 +5,20 @@
  * · 抽卡会重置工程内全部安排（Pattern / 音符 / 音色 / 混音 / Song 编排），
  *   但会记录一步历史，生成后 Ctrl+Z 即可回到上一首
  * · 生成后自动切到 Song 模式播放试听
+ * · 桌面两侧是和声轨 / 音符雨实时可视化；移动端同款降级为卡片下的横条 + 雨幕
  */
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   AlertTriangle,
+  AudioWaveform,
   Dice5,
   Dice6,
   Dices,
   Disc3,
   Drum,
   Guitar,
+  ListMusic,
   Piano,
   Sparkles,
   Wand2,
@@ -28,6 +31,8 @@ import { useT } from '../../i18n/ui';
 import { generateRandomSong, MIN_PATTERNS, MAX_PATTERNS } from '../../utils/music/compose';
 import { STYLES } from '../../utils/music/styles';
 import type { GeneratedInfo, StyleId } from '../../utils/music/types';
+import { ChordStream } from './ChordStream';
+import { NoteRain } from './NoteRain';
 
 const ROLL_FRAMES = [Dices, Dice5, Dice6, Sparkles, Drum, Piano, Guitar, Disc3];
 
@@ -175,100 +180,140 @@ export function RandomDraw() {
   };
 
   const RollIcon = ROLL_FRAMES[frame % ROLL_FRAMES.length];
+  const viz = result?.viz ?? null;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-      <div className="flex flex-col items-center gap-4 p-4 md:p-5">
-        {/* 一句话说明 */}
-        <div className="w-full max-w-md text-center">
-          <h4 className="label-caps mb-1">Gacha Compose</h4>
-          <p className="text-sm leading-snug font-semibold text-fg-muted">
-            {t.random.intro(STYLES.length)}
-          </p>
-        </div>
-
-        {/* Pattern 数（越大越长越丰富） */}
-        <div className="flex w-full max-w-md flex-col gap-1.5">
-          <div className="flex items-center gap-2">
-            <span className="label-caps">{t.random.patterns}</span>
-            <span className="ml-auto rounded-full border border-ink/40 bg-white/70 px-2 py-0.5 text-[10px] font-black tracking-wider text-ink uppercase">
-              {t.random.patternsTier(patternCount)}
-            </span>
+      <div className="mx-auto flex w-full max-w-[1380px] flex-1 items-stretch gap-3 p-3 md:p-4 lg:gap-4">
+        {/* 桌面左栏：和声轨（当前和弦居中跟随播放头） */}
+        <aside className="card-sandwich hidden w-[250px] shrink-0 flex-col p-3 lg:flex">
+          <div className="label-caps mb-1.5 flex items-center gap-1.5">
+            <ListMusic className="h-3.5 w-3.5" strokeWidth={2.6} />
+            {t.random.vizChords}
           </div>
-          <div className="flex items-center gap-1.5">
-            {Array.from({ length: MAX_PATTERNS - MIN_PATTERNS + 1 }, (_, i) => MIN_PATTERNS + i).map(
-              (n) => {
-                const on = n === patternCount;
-                return (
-                  <button
-                    key={n}
-                    type="button"
-                    aria-pressed={on}
-                    onClick={() => setPatternCount(n)}
-                    className={`h-9 flex-1 cursor-pointer rounded-lg border-2 border-ink text-sm font-extrabold text-ink tabular-nums transition-all select-none ${
-                      on
-                        ? 'bg-neon-cyan shadow-[1.5px_1.5px_0_#17171C,0_0_8px_rgba(0,229,255,0.5)]'
-                        : 'bg-card shadow-hard-sm hover:-translate-y-0.5 active:translate-y-0 active:shadow-none'
-                    }`}
-                  >
-                    {n}
-                  </button>
-                );
-              },
-            )}
-          </div>
-          <span className="label-caps text-[9px]">{t.random.patternsHint}</span>
-        </div>
+          <ChordStream viz={viz} />
+        </aside>
 
-        {/* 抽卡按钮 */}
-        <motion.button
-          type="button"
-          onClick={draw}
-          disabled={rolling}
-          whileHover={rolling ? undefined : { y: -3, boxShadow: '5px 5px 0 #17171C' }}
-          whileTap={rolling ? undefined : { x: 2, y: 2, boxShadow: '1px 1px 0 #17171C' }}
-          className="flex items-center gap-3 rounded-2xl border-2 border-ink bg-ink px-7 py-4 text-lg font-extrabold text-white shadow-hard select-none disabled:opacity-70"
-        >
-          <AnimatePresence mode="wait" initial={false}>
-            {rolling ? (
-              <motion.span
-                key="rolling"
-                className="inline-flex"
-                animate={{ rotate: 360, scale: [1, 1.3, 1] }}
-                transition={{ repeat: Infinity, duration: 0.5, ease: 'linear' }}
-              >
-                <RollIcon className="h-6 w-6 text-neon-cyan" strokeWidth={2.4} />
-              </motion.span>
-            ) : (
-              <motion.span
-                key="idle"
-                className="inline-flex animate-[spin_2.4s_linear_infinite]"
-              >
-                <Wand2 className="h-6 w-6 text-neon-cyan" strokeWidth={2.4} />
-              </motion.span>
+        {/* 中栏：抽卡主流程 */}
+        <main className="mx-auto flex w-full min-w-0 max-w-md flex-col items-center gap-4">
+          {/* 一句话说明 */}
+          <div className="w-full max-w-md text-center">
+            <h4 className="label-caps mb-1">Gacha Compose</h4>
+            <p className="text-sm leading-snug font-semibold text-fg-muted">
+              {t.random.intro(STYLES.length)}
+            </p>
+          </div>
+
+          {/* Pattern 数（越大越长越丰富） */}
+          <div className="flex w-full max-w-md flex-col gap-1.5">
+            <div className="flex items-center gap-2">
+              <span className="label-caps">{t.random.patterns}</span>
+              <span className="ml-auto rounded-full border border-ink/40 bg-white/70 px-2 py-0.5 text-[10px] font-black tracking-wider text-ink uppercase">
+                {t.random.patternsTier(patternCount)}
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              {Array.from({ length: MAX_PATTERNS - MIN_PATTERNS + 1 }, (_, i) => MIN_PATTERNS + i).map(
+                (n) => {
+                  const on = n === patternCount;
+                  return (
+                    <button
+                      key={n}
+                      type="button"
+                      aria-pressed={on}
+                      onClick={() => setPatternCount(n)}
+                      className={`h-9 flex-1 cursor-pointer rounded-lg border-2 border-ink text-sm font-extrabold text-ink tabular-nums transition-all select-none ${
+                        on
+                          ? 'bg-neon-cyan shadow-[1.5px_1.5px_0_#17171C,0_0_8px_rgba(0,229,255,0.5)]'
+                          : 'bg-card shadow-hard-sm hover:-translate-y-0.5 active:translate-y-0 active:shadow-none'
+                      }`}
+                    >
+                      {n}
+                    </button>
+                  );
+                },
+              )}
+            </div>
+            <span className="label-caps text-[9px]">{t.random.patternsHint}</span>
+          </div>
+
+          {/* 抽卡按钮 */}
+          <motion.button
+            type="button"
+            onClick={draw}
+            disabled={rolling}
+            whileHover={rolling ? undefined : { y: -3, boxShadow: '5px 5px 0 #17171C' }}
+            whileTap={rolling ? undefined : { x: 2, y: 2, boxShadow: '1px 1px 0 #17171C' }}
+            className="flex items-center gap-3 rounded-2xl border-2 border-ink bg-ink px-7 py-4 text-lg font-extrabold text-white shadow-hard select-none disabled:opacity-70"
+          >
+            <AnimatePresence mode="wait" initial={false}>
+              {rolling ? (
+                <motion.span
+                  key="rolling"
+                  className="inline-flex"
+                  animate={{ rotate: 360, scale: [1, 1.3, 1] }}
+                  transition={{ repeat: Infinity, duration: 0.5, ease: 'linear' }}
+                >
+                  <RollIcon className="h-6 w-6 text-neon-cyan" strokeWidth={2.4} />
+                </motion.span>
+              ) : (
+                <motion.span
+                  key="idle"
+                  className="inline-flex animate-[spin_2.4s_linear_infinite]"
+                >
+                  <Wand2 className="h-6 w-6 text-neon-cyan" strokeWidth={2.4} />
+                </motion.span>
+              )}
+            </AnimatePresence>
+            {rolling ? t.random.rolling : result ? t.random.again : t.random.draw}
+          </motion.button>
+
+          {error && <p className="text-sm font-bold text-neon-pink">{error}</p>}
+
+          {/* 移动端可视化：和声横条 + 音符雨（桌面挪到两侧栏） */}
+          <section className="card-sandwich flex w-full flex-col gap-2 p-2.5 lg:hidden">
+            <div className="label-caps flex items-center gap-1.5 px-0.5">
+              <ListMusic className="h-3.5 w-3.5" strokeWidth={2.6} />
+              {t.random.vizChords}
+            </div>
+            <div className="flex h-14">
+              <ChordStream viz={viz} orientation="horizontal" />
+            </div>
+            <div className="label-caps flex items-center gap-1.5 px-0.5">
+              <AudioWaveform className="h-3.5 w-3.5" strokeWidth={2.6} />
+              {t.random.vizRain}
+            </div>
+            <div className="flex h-36">
+              <NoteRain viz={viz} />
+            </div>
+          </section>
+
+          <AnimatePresence>
+            {result && !rolling && (
+              <ResultCard
+                key={`${result.styleId}${result.bpm}${Date.now()}`}
+                info={result}
+              />
             )}
           </AnimatePresence>
-          {rolling ? t.random.rolling : result ? t.random.again : t.random.draw}
-        </motion.button>
 
-        {error && <p className="text-sm font-bold text-neon-pink">{error}</p>}
+          {/* 警告贴纸 */}
+          <div className="flex w-full items-center gap-2 rounded-xl border-2 border-ink bg-neon-yellow/25 px-3 py-2 shadow-hard-sm">
+            <AlertTriangle className="h-4 w-4 shrink-0 text-ink" strokeWidth={2.6} />
+            <p className="text-xs font-bold text-ink">
+              {t.random.warning}
+            </p>
+          </div>
+        </main>
 
-        <AnimatePresence>
-          {result && !rolling && (
-            <ResultCard
-              key={`${result.styleId}${result.bpm}${Date.now()}`}
-              info={result}
-            />
-          )}
-        </AnimatePresence>
-
-        {/* 警告贴纸 */}
-        <div className="flex w-full max-w-md items-center gap-2 rounded-xl border-2 border-ink bg-neon-yellow/25 px-3 py-2 shadow-hard-sm">
-          <AlertTriangle className="h-4 w-4 shrink-0 text-ink" strokeWidth={2.6} />
-          <p className="text-xs font-bold text-ink">
-            {t.random.warning}
-          </p>
-        </div>
+        {/* 桌面右栏：音符雨 + 鼓垫 + 频谱 */}
+        <aside className="card-sandwich hidden w-[280px] shrink-0 flex-col p-3 lg:flex">
+          <div className="label-caps mb-1.5 flex items-center gap-1.5">
+            <AudioWaveform className="h-3.5 w-3.5" strokeWidth={2.6} />
+            {t.random.vizRain}
+          </div>
+          <NoteRain viz={viz} />
+        </aside>
       </div>
     </div>
   );

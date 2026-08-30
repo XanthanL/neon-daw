@@ -38,6 +38,10 @@ import type {
   SectionKind,
   StyleDef,
   StyleId,
+  VizChord,
+  VizDrum,
+  VizNote,
+  VizSection,
 } from './types';
 
 const BAR_STEPS = 16;
@@ -416,6 +420,7 @@ function buildProject(
   const patterns: Pattern[] = [];
   const clips: SongClip[] = [];
   const sections: { name: string; kind: SectionKind; bars: number }[] = [];
+  const vizSections: VizSection[] = [];
   const kindTotal: Partial<Record<SectionKind, number>> = {};
   for (const seg of form) kindTotal[seg.kind] = (kindTotal[seg.kind] ?? 0) + 1;
   const kindSeen: Partial<Record<SectionKind, number>> = {};
@@ -442,6 +447,8 @@ function buildProject(
     const name = `${SECTION_LABEL[seg.kind]}${numbered ? ` ${kindSeen[seg.kind]}` : ''}`;
 
     const notes: Note[] = [];
+    /* 可视化雨：pad 长音太密不入库，和声轨单独走 chords */
+    const vizNotes: VizNote[] = [];
     for (const spec of roleSpecs) {
       if (!spec.sections.includes(seg.kind)) continue;
       const chId = roleChannel[spec.role];
@@ -467,20 +474,45 @@ function buildProject(
 
       for (const n of bare) {
         if (n.startStep >= total || n.startStep < 0) continue;
+        const pitch = foldPitch(n.pitch);
+        const len = clamp(1, total - n.startStep, n.lengthSteps);
         notes.push({
           id: rid('n'),
           channelId: chId,
-          pitch: foldPitch(n.pitch),
+          pitch,
           startStep: n.startStep,
-          lengthSteps: clamp(1, total - n.startStep, n.lengthSteps),
+          lengthSteps: len,
           velocity: clamp(1, 127, n.velocity),
         });
+        if (spec.role !== 'pad')
+          vizNotes.push({ step: n.startStep, len, pitch, vel: clamp(1, 127, n.velocity), role: spec.role });
       }
+    }
+
+    const vizChords: VizChord[] = chords.map((c) => ({
+      step: c.startStep,
+      roman: c.roman,
+      lengthSteps: c.lengthSteps,
+      voicing: c.voicing,
+    }));
+    const vizDrums: VizDrum[] = [];
+    for (const dt of DRUM_ORDER) {
+      const lane = drumLanes[dt];
+      for (let i = 0; i < total; i++) if (lane[i]?.on) vizDrums.push({ step: i, kit: dt, vel: lane[i].velocity });
     }
 
     const pattern: Pattern = { id: rid('pat'), name, bars: seg.bars, steps, notes };
     patterns.push(pattern);
     sections.push({ name, kind: seg.kind, bars: seg.bars * seg.repeat });
+    vizSections.push({
+      name,
+      kind: seg.kind,
+      startBar: barCursor,
+      bars: seg.bars,
+      chords: vizChords,
+      notes: vizNotes,
+      drums: vizDrums,
+    });
 
     for (let i = 0; i < seg.repeat; i++) {
       clips.push({ id: rid('clip'), patternId: pattern.id, startBar: barCursor });
@@ -518,6 +550,7 @@ function buildProject(
     roles: infoRoles,
     sections,
     bars: barCursor,
+    viz: { bpm, totalBars: barCursor, sections: vizSections },
   };
 
   return { project, info };

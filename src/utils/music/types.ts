@@ -8,7 +8,7 @@ import type { LucideIcon } from 'lucide-react';
 import type { PresetCategoryId } from '../../audio/synthPresets';
 import type { DrumType, FxType } from '../../types/project';
 
-/** 风格池：20 种命名风格 */
+/** 风格池：28 种命名风格 */
 export type StyleId =
   | 'city-pop'
   | 'lo-fi'
@@ -29,7 +29,15 @@ export type StyleId =
   | 'future-bass'
   | 'ambient'
   | 'ballad'
-  | 'disco';
+  | 'disco'
+  | 'uk-garage'
+  | 'trip-hop'
+  | 'gospel'
+  | 'drill'
+  | 'electric-blues'
+  | 'country'
+  | 'samba'
+  | 'vaporwave';
 
 /** 段落类型（曲式与配器增减的粒度） */
 export type SectionKind =
@@ -242,6 +250,52 @@ export interface GeneratedSection {
   bars: number;
 }
 
+/* ============================================================
+ * 可视化摘要（Random 模块的音符雨 / 和声轨数据源）
+ * ============================================================ */
+
+/** 段内一个和弦事件：步位 + 罗马数字 + 实际排列 */
+export interface VizChord {
+  step: number;
+  roman: string;
+  lengthSteps: number;
+  voicing: number[];
+}
+
+/** 段内一条旋律/和声/低音音符（步位制） */
+export interface VizNote {
+  step: number;
+  len: number;
+  pitch: number;
+  vel: number;
+  role: RoleId;
+}
+
+/** 段内一次鼓点击 */
+export interface VizDrum {
+  step: number;
+  kit: DrumType;
+  vel: number;
+}
+
+export interface VizSection {
+  name: string;
+  kind: SectionKind;
+  /** 全曲绝对起始小节 */
+  startBar: number;
+  bars: number;
+  chords: VizChord[];
+  notes: VizNote[];
+  drums: VizDrum[];
+}
+
+/** 整曲可视化描述：段落按 Song 顺序首尾相接 */
+export interface VizSong {
+  bpm: number;
+  totalBars: number;
+  sections: VizSection[];
+}
+
 export interface GeneratedInfo {
   styleId: StyleId;
   styleName: string;
@@ -257,4 +311,5 @@ export interface GeneratedInfo {
   roles: GeneratedRole[];
   sections: GeneratedSection[];
   bars: number;
+  viz: VizSong;
 }
