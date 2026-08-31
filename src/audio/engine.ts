@@ -120,6 +120,13 @@ export class AudioEngine {
   private unsubs: Array<() => void> = [];
   /** 虚拟键盘按住的音符（channelId → midi → 实际发声频率，用于精准 release） */
   private heldFreqs = new Map<string, Map<number, number>>();
+  /**
+   * noteOn 是异步的（先 await unlock 起音频），快速点按/页面首次交互时
+   * noteOff 会先于 attack 落地 → 松手找不到可释放的音，attack 卡成永动低频嗡嗡声。
+   * inflight 记录「noteOn 已发但还没落地」的键；pendingOff 记录其间到达的松手，落地时作废该次发声。
+   */
+  private noteOnInflight = new Map<string, Set<number>>();
+  private noteOffWaiting = new Map<string, Set<number>>();
 
   /* ============================================================
    * 生命周期
@@ -240,9 +247,21 @@ export class AudioEngine {
     transport.seconds = 0; // 位置归零
     Tone.getDraw().cancel();
     this.step = 0;
+    this.releaseAllHeld(); // 兜底：停播时不收的延音会一直嗡嗡
     const ui = useUiStore.getState();
     ui.setIsPlaying(false);
     ui.setCurrentStep(0);
+  }
+
+  /** 强制释放所有在途/按住的音（防卡音），并清空竞态簿记 */
+  private releaseAllHeld(): void {
+    for (const [channelId, held] of this.heldFreqs) {
+      const nodes = this.channels.get(channelId);
+      for (const freq of held.values()) nodes?.poly?.triggerRelease(freq);
+      held.clear();
+    }
+    for (const waiting of this.noteOffWaiting.values()) waiting.clear();
+    for (const inflight of this.noteOnInflight.values()) inflight.clear();
   }
 
   /** 跳转播放头到某个 16 分步（0 基，按循环区间夹取）；播放中即时生效 */
@@ -430,7 +449,17 @@ export class AudioEngine {
 
   /** 虚拟键盘按下（持续发声直到 noteOff） */
   async noteOn(channelId: string, midi: number, velocity = 100): Promise<void> {
+    let inflight = this.noteOnInflight.get(channelId);
+    if (!inflight) {
+      inflight = new Set();
+      this.noteOnInflight.set(channelId, inflight);
+    }
+    inflight.add(midi);
     await this.unlock();
+    // 解锁期间已经松手 → 丢弃这次 attack，绝不留下无主延音
+    const offed = this.noteOffWaiting.get(channelId)?.delete(midi) ?? false;
+    inflight.delete(midi);
+    if (offed) return;
     const nodes = this.channels.get(channelId);
     if (!nodes) return;
     const vel = Math.min(1, Math.max(0.01, velocity / 127));
@@ -453,16 +482,24 @@ export class AudioEngine {
     nodes.poly.triggerAttack(freq, Tone.now() + 0.01, vel);
   }
 
-  /** 虚拟键盘松开（采样延音与合成器都精准 release） */
+  /** 虚拟键盘松开（采样延音与合成器都精准 release；在途 noteOn 会被作废） */
   noteOff(channelId: string, midi: number): void {
     const nodes = this.channels.get(channelId);
     nodes?.sample?.release(midi);
     const held = this.heldFreqs.get(channelId);
-    if (!held) return;
-    const freq = held.get(midi);
-    if (freq === undefined) return;
-    held.delete(midi);
-    nodes?.poly?.triggerRelease(freq);
+    const freq = held?.get(midi);
+    if (freq !== undefined) {
+      held!.delete(midi);
+      nodes?.poly?.triggerRelease(freq);
+    } else if (this.noteOnInflight.get(channelId)?.has(midi)) {
+      // attack 还在 await unlock 路上：记下松手，落地时作废
+      let waiting = this.noteOffWaiting.get(channelId);
+      if (!waiting) {
+        waiting = new Set();
+        this.noteOffWaiting.set(channelId, waiting);
+      }
+      waiting.add(midi);
+    }
   }
 
   /* ============================================================
