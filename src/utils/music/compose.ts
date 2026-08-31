@@ -4,6 +4,7 @@
  * 1. 抽风格 → 定调（一次抽卡内全段共用同一 KeyCtx 与预设指派）
  * 2. 和声计划 → 每段 4/8 小节的 ChordEvent（扩展音 / 转位 / 声部平滑已决策）
  * 3. 动机 → 全曲共用一个细胞，逐段做起承转合变体（保证高潮可识别）
+ *    · beatAndChords 纯律动模式跳过主旋律声部，只留鼓组 + 和声，声部门槛放低一档补位
  * 4. 每个 form 段落生成一个 Pattern：鼓按段落 intensity 加密，声部按 role.sections 增减
  * 5. Song 编排：同段 repeat → 多个 clip 复用同一 patternId
  * 6. validateProject 兜底，不合规则重抽（≤3 次后抛错）
@@ -301,6 +302,7 @@ function buildProject(
   style: StyleDef,
   rng: Rng,
   patternCount: number,
+  beatAndChords: boolean,
 ): { project: Project; info: GeneratedInfo } {
   const ctx: KeyCtx = makeKey(rng, style.scales);
   const prog = rng.pick(style.harmony.prog);
@@ -309,9 +311,13 @@ function buildProject(
   /* Pattern 数 → 密度：越大越长、越多声部、越密的 groove */
   const count = clamp(MIN_PATTERNS, MAX_PATTERNS, patternCount);
   const d = (count - MIN_PATTERNS) / (MAX_PATTERNS - MIN_PATTERNS);
-  const maxTier = d < 0.2 ? 0 : d < 0.45 ? 1 : d < 0.7 ? 2 : 3;
-  const tiered = style.roles.filter((r) => ROLE_TIER[r.role] <= maxTier);
-  const roleSpecs = tiered.length ? tiered : style.roles.slice(0, 1);
+  /* 纯律动模式不谱主旋律：声部池去掉 lead，分层门槛放低一档，
+     让 pad / arp 提前进场补住主旋律原本占住的高频 */
+  const pool = beatAndChords ? style.roles.filter((r) => r.role !== 'lead') : style.roles;
+  const tier = d < 0.2 ? 0 : d < 0.45 ? 1 : d < 0.7 ? 2 : 3;
+  const maxTier = Math.min(3, tier + (beatAndChords ? 1 : 0));
+  const tiered = pool.filter((r) => ROLE_TIER[r.role] <= maxTier);
+  const roleSpecs = tiered.length ? tiered : pool.slice(0, 1);
   const form = (FORM_BY_COUNT[count] ?? FORM_BY_COUNT[MAX_PATTERNS]).map((kind) => ({
     kind,
     bars: BARS_BY_KIND[kind],
@@ -544,7 +550,8 @@ function buildProject(
     bpm,
     progression: seedChords.map((c) => c.roman).join(' – '),
     cadenceLabel: CADENCE_LABEL[style.harmony.cadence],
-    motifLabel: describeOps(usedOps),
+    motifLabel: beatAndChords ? '' : describeOps(usedOps),
+    beatAndChords,
     roles: infoRoles,
     sections,
     bars: barCursor,
@@ -560,15 +567,18 @@ export function generateRandomSong(
     styleId?: StyleId;
     excludeStyleId?: StyleId | null;
     patternCount?: number;
+    /** 纯律动：只出鼓组 + 和声，不谱主旋律 */
+    beatAndChords?: boolean;
   } = {},
 ): { project: Project; info: GeneratedInfo } {
   const rng = makeRng();
   const patternCount = clamp(MIN_PATTERNS, MAX_PATTERNS, opts.patternCount ?? 5);
+  const beatAndChords = opts.beatAndChords ?? false;
   let lastError = '未知原因';
   for (let attempt = 0; attempt < 4; attempt++) {
     const seeded = opts.styleId ? getStyle(opts.styleId) : undefined;
     const style = seeded ?? drawStyle(rng, opts.excludeStyleId);
-    const { project, info } = buildProject(style, rng, patternCount);
+    const { project, info } = buildProject(style, rng, patternCount, beatAndChords);
     const errors = validateProject(project);
     if (!errors.length) return { project, info };
     lastError = errors.slice(0, 3).join('；');

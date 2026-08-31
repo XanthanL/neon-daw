@@ -5,6 +5,7 @@
  * · 抽卡会重置工程内全部安排（Pattern / 音符 / 音色 / 混音 / Song 编排），
  *   但会记录一步历史，生成后 Ctrl+Z 即可回到上一首
  * · 生成后自动切到 Song 模式播放试听
+ * · 「纯律动」开关：跳过主旋律声部，只抽鼓组 + 贝斯 + 和声，卡片同时把动机手法一栏换成织体说明
  * · 桌面两侧是和声轨 / 节奏挑战实时可视化；移动端同款降级为卡片下的横条 + 游戏模块
  */
 import { useEffect, useRef, useState } from 'react';
@@ -44,7 +45,10 @@ function ResultCard({ info }: { info: GeneratedInfo }) {
     ['BPM', String(info.bpm)],
     [t.random.progression, info.progression],
     [t.random.cadence, info.cadenceLabel],
-    [t.random.motif, info.motifLabel],
+    /* 纯律动模式没有主旋律，动机手法一栏换成织体说明 */
+    info.beatAndChords
+      ? [t.random.texture, t.random.textureBeat]
+      : [t.random.motif, info.motifLabel],
   ];
   return (
     <motion.div
@@ -120,6 +124,8 @@ export function RandomDraw() {
   const [error, setError] = useState<string | null>(null);
   const [frame, setFrame] = useState(0);
   const [patternCount, setPatternCount] = useState(5);
+  /** 纯律动：抽掉主旋律，只出鼓组 + 贝斯 + 和声 */
+  const [beatAndChords, setBeatAndChords] = useState(false);
   const rollTimer = useRef<number | null>(null);
   /** 上一次抽中的风格，避免连抽同一种 */
   const lastStyle = useRef<StyleId | null>(null);
@@ -156,6 +162,7 @@ export function RandomDraw() {
         const { project, info } = generateRandomSong({
           excludeStyleId: lastStyle.current,
           patternCount,
+          beatAndChords,
         });
         engine.stop();
         const ok = importProject(project);
@@ -237,6 +244,42 @@ export function RandomDraw() {
             </div>
             <span className="label-caps text-[9px]">{t.random.patternsHint}</span>
           </div>
+
+          {/* 纯律动开关：抽掉主旋律，只留鼓组 + 和声 */}
+          <button
+            type="button"
+            aria-pressed={beatAndChords}
+            onClick={() => setBeatAndChords((v) => !v)}
+            className={`flex w-full max-w-md items-center gap-2.5 rounded-xl border-2 border-ink px-3 py-2 text-left select-none transition-all ${
+              beatAndChords
+                ? 'bg-neon-cyan shadow-[1.5px_1.5px_0_#17171C,0_0_8px_rgba(0,229,255,0.5)]'
+                : 'bg-card shadow-hard-sm hover:-translate-y-0.5 active:translate-y-0 active:shadow-none'
+            }`}
+          >
+            <Drum
+              className={`h-4 w-4 shrink-0 text-ink ${beatAndChords ? '' : 'opacity-50'}`}
+              strokeWidth={2.6}
+            />
+            <span className="min-w-0 flex-1">
+              <span className="block text-sm leading-tight font-extrabold text-ink">
+                {t.random.beatChords}
+              </span>
+              <span className="block text-[10px] leading-tight font-semibold text-fg-muted">
+                {t.random.beatChordsHint}
+              </span>
+            </span>
+            <span
+              className={`grid h-5 w-9 shrink-0 place-items-start rounded-full border-2 border-ink p-[3px] transition-colors ${
+                beatAndChords ? 'bg-ink' : 'bg-white/70'
+              }`}
+            >
+              <span
+                className={`h-2.5 w-2.5 rounded-full transition-transform ${
+                  beatAndChords ? 'translate-x-4 bg-neon-cyan' : 'bg-ink/40'
+                }`}
+              />
+            </span>
+          </button>
 
           {/* 抽卡按钮 */}
           <motion.button

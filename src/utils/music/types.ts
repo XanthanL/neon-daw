@@ -318,6 +318,8 @@ export interface GeneratedInfo {
   progression: string;
   cadenceLabel: string;
   motifLabel: string;
+  /** 纯律动模式：本次抽卡去掉了主旋律声部，只剩鼓组 + 和声 */
+  beatAndChords: boolean;
   roles: GeneratedRole[];
   sections: GeneratedSection[];
   bars: number;
