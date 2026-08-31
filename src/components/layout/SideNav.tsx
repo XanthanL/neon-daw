@@ -81,7 +81,7 @@ export function SideNav() {
       <div className="h-0.5 w-8 rounded-full bg-ink/15" />
 
       <nav
-        className="flex min-h-0 w-full flex-1 flex-col items-center gap-2 overflow-y-auto"
+        className="rail-nav flex min-h-0 w-full flex-1 flex-col items-center gap-2"
         aria-label={t.nav.moduleNav}
       >
         {MODULES.map((m, i) => {

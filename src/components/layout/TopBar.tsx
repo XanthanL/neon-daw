@@ -25,7 +25,6 @@ import { useUiStore } from '../../stores/uiStore';
 import { useT } from '../../i18n/ui';
 import { exportProjectToFile, readProjectFile } from '../../utils/projectIO';
 import { DiscLogo } from './SideNav';
-import { EdgeScroll } from '../ui/EdgeScroll';
 import { ExpandStrip } from '../ui/ExpandStrip';
 import { IconButton } from '../ui/IconButton';
 import { Knob } from '../ui/Knob';
@@ -215,7 +214,7 @@ function BpmControl() {
 }
 
 /* ============================================================
- * Pattern 选择器（桌面横向滚动 · 边界渐隐；手机收成按钮，点开铺平再选）
+ * Pattern 选择器（全断点统一：点触发按钮 → 悬挂浮层铺平所有 Pattern → 点选）
  * ============================================================ */
 
 function PatternSelect() {
@@ -225,8 +224,9 @@ function PatternSelect() {
   const setPatternManagerOpen = useUiStore((s) => s.setPatternManagerOpen);
   const t = useT();
   const openManager = () => setPatternManagerOpen(true);
-  /* 手机触发按钮空间窄，用 P{n} 短标；全名在展开面板 / 管理面板里看 */
+  /* 手机触发按钮空间窄，用 P{n} 短标；桌面显示全名（展开面板 / 管理面板里都能看到全名） */
   const currentIdx = patterns.findIndex((p) => p.id === currentPatternId);
+  const current = patterns[currentIdx];
 
   const pills = patterns.map((p) => {
     const active = p.id === currentPatternId;
@@ -252,22 +252,21 @@ function PatternSelect() {
     <div className="flex min-w-0 flex-1 flex-col gap-1 md:flex-none">
       <span className="label-caps hidden md:block">{t.topbar.pattern}</span>
       <div className="flex min-w-0 items-center gap-1.5">
-        {/* 手机：触发按钮显示当前 Pattern，点一下悬挂铺平面板 */}
+        {/* 全断点同一个交互：点触发按钮 → 悬挂浮层铺平所有 Pattern → 点选。
+            桌面端不再用横向滚动条（胶囊多了根本滑不到） */}
         <ExpandStrip
-          dropdown
-          summary={`P${currentIdx + 1}`}
-          className="flex-1 md:hidden"
+          atAllSizes
+          summary={
+            <>
+              <span className="md:hidden">P{currentIdx + 1}</span>
+              <span className="hidden md:inline">{current?.name ?? t.topbar.pattern}</span>
+            </>
+          }
+          className="min-w-0 flex-1 md:w-56 md:flex-none"
           listClassName="gap-1.5"
         >
           {pills}
         </ExpandStrip>
-        {/* 桌面：横向滚动 + 边界渐隐 */}
-        <EdgeScroll
-          className="hidden flex-1 md:block md:max-w-[260px] md:flex-none"
-          listClassName="flex items-center gap-1.5"
-        >
-          {pills}
-        </EdgeScroll>
         <IconButton label={t.topbar.manage} onClick={openManager}>
           <ListMusic />
         </IconButton>

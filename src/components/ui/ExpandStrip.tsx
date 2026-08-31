@@ -2,6 +2,7 @@
  * 选择条：桌面（md+）保持横向滚动，手机端收成一行触发按钮（显示当前项/标题），
  * 点一下展开把所有选项铺开换行显示再选择 —— 比在小屏上来回滑好找。
  * dropdown = true 时展开面板悬挂为浮层（顶栏用，不挤压单行布局）。
+ * atAllSizes = true 时不分断点，桌面端也走「点开浮层再选」（Pattern 选择器用）。
  */
 import { useEffect, useRef, useState, type MouseEvent, type ReactNode } from 'react';
 import { ChevronDown } from 'lucide-react';
@@ -13,6 +14,7 @@ export function ExpandStrip({
   className = '',
   listClassName = '',
   dropdown = false,
+  atAllSizes = false,
 }: {
   /** 手机收起时触发按钮上的文字（一般是当前选中项名称） */
   summary: ReactNode;
@@ -24,9 +26,14 @@ export function ExpandStrip({
   /** 选项排布 class（gap 等） */
   listClassName?: string;
   dropdown?: boolean;
+  /** 桌面端也用点开式浮层，不再铺横向滚动条 */
+  atAllSizes?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const hangs = dropdown || atAllSizes;
+  /** 触发按钮 / 面板在哪些断点出现：全断点则不带 md:hidden */
+  const onlyMobile = atAllSizes ? '' : 'md:hidden';
 
   /* 点击外部收起；延迟一帧挂监听，避免本次展开的点击立刻把自己关掉（React 18 同步副作用） */
   useEffect(() => {
@@ -54,7 +61,7 @@ export function ExpandStrip({
         type="button"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className={`flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg border-2 border-ink bg-card px-2.5 py-1.5 text-xs font-extrabold text-ink shadow-hard-sm transition-all select-none md:hidden ${
+        className={`flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg border-2 border-ink bg-card px-2.5 py-1.5 text-xs font-extrabold text-ink shadow-hard-sm transition-all select-none ${onlyMobile} ${
           open ? '' : 'active:translate-y-0.5 active:shadow-none'
         }`}
       >
@@ -72,8 +79,8 @@ export function ExpandStrip({
         <div
           onClick={closeOnPick}
           className={
-            dropdown
-              ? `absolute top-full right-0 z-30 mt-1.5 flex max-h-56 w-64 max-w-[calc(100vw-6rem)] flex-wrap gap-1.5 overflow-y-auto rounded-xl border-2 border-ink bg-bg-warm p-2 shadow-hard md:hidden ${listClassName}`
+            hangs
+              ? `absolute top-full right-0 z-30 mt-1.5 flex max-h-56 w-64 max-w-[calc(100vw-6rem)] flex-wrap gap-1.5 overflow-y-auto rounded-xl border-2 border-ink bg-bg-warm p-2 shadow-hard ${onlyMobile} ${listClassName}`
               : `mt-1.5 flex flex-wrap gap-1.5 md:hidden ${listClassName}`
           }
         >
@@ -81,10 +88,14 @@ export function ExpandStrip({
         </div>
       )}
 
-      {/* 桌面：原样横向滚动 */}
-      <div className={`hscroll hidden min-w-0 items-center overflow-x-auto md:flex ${listClassName}`}>
-        {children}
-      </div>
+      {/* 桌面：原样横向滚动（atAllSizes 时不需要） */}
+      {!atAllSizes && (
+        <div
+          className={`hscroll hidden min-w-0 items-center overflow-x-auto md:flex ${listClassName}`}
+        >
+          {children}
+        </div>
+      )}
     </div>
   );
 }

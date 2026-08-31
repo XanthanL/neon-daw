@@ -95,20 +95,23 @@
     background: rgba(0, 229, 255, 0.35);
   }
 
-  /* 全站统一滚动条（三明治风格）：细、圆头墨色，悬停荧光青；竖 / 横一致，覆盖 Firefox + WebKit */
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(23, 23, 28, 0.28) transparent;
-  }
+  /* 全站统一滚动条（三明治画风）：亮轨 + 圆头墨色药丸，悬停荧光青，横竖一致。
+     坑：元素一旦带上 scrollbar-width / scrollbar-color，Chrome 就整套忽略
+     ::-webkit-scrollbar 伪元素样式（实测只剩 12px 系统细条），所以标准属性
+     只写进 Firefox 专用的 @supports 分支，其余浏览器交给伪元素画。 */
   ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 12px;
+    height: 12px;
+  }
+  ::-webkit-scrollbar-button {
+    display: none;
   }
   ::-webkit-scrollbar-track {
-    background: transparent;
+    background: rgba(23, 23, 28, 0.08);
+    border-radius: 999px;
   }
   ::-webkit-scrollbar-thumb {
-    background: rgba(23, 23, 28, 0.28);
+    background: rgba(23, 23, 28, 0.85);
     border: 3px solid transparent;
     border-radius: 999px;
     background-clip: padding-box;
@@ -119,6 +122,12 @@
   }
   ::-webkit-scrollbar-corner {
     background: transparent;
+  }
+  @supports (-moz-images-in-menus: 0) {
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(23, 23, 28, 0.72) rgba(23, 23, 28, 0.08);
+    }
   }
 }
 
@@ -219,6 +228,37 @@
 .hscroll {
   padding-top: 4px;
   padding-bottom: 4px;
+}
+
+/* 触屏专属容器（抽屉列表等）：完全不显示滚动条。
+   留着的话展开动画中途「内容暂时溢出」会让细条闪现又消失，
+   12px 占位宽度一变，整列按钮就横向抖一下。 */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+.no-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* 桌面左栏模块列表：平时绝不做滚动容器。overflow-y:auto 会连带把 overflow-x
+   变成 auto（隐式裁剪），右侧悬挂的 Tooltip 气泡既被切掉一大截，又会把容器
+   撑出一条没人要的横向滚动条。窗口矮到放不下图标时才开纵向滚动兜底，
+   并把横向显式 clip 掉（clip 不产生滚动条，也不占宽度）。 */
+.rail-nav {
+  overflow: visible;
+}
+@media (max-height: 520px) {
+  .rail-nav {
+    overflow-y: auto;
+    overflow-x: clip;
+  }
+  .rail-nav [role='tooltip'] {
+    display: none;
+  }
 }
 
 /* 触屏无 hover：提示气泡彻底不出现（否则点按后会卡在屏幕上并溢出视口） */

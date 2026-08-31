@@ -103,7 +103,7 @@ export function MobileNavDrawer() {
               initial="initial"
               animate="animate"
               exit="exit"
-              className="min-h-0 flex-1 overflow-y-auto px-3.5 pt-2.5 pb-5"
+              className="no-scrollbar min-h-0 flex-1 overscroll-contain overflow-y-auto px-3.5 pt-2.5 pb-5"
             >
               {MODULES.map((m, i) => {
                 const Icon = m.icon;
