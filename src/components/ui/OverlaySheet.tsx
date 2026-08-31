@@ -16,9 +16,16 @@ import { X } from 'lucide-react';
 import { useT } from '../../i18n/ui';
 
 let openCount = 0;
+/** 非抽屉的全屏接管层（如节奏演奏）计数：与抽屉共用同一条全局快捷键短路 */
+let grabCount = 0;
 
-/** 是否有浮层抽屉处于打开态（全局快捷键据此短路） */
-export const isOverlayOpen = () => openCount > 0;
+/** 是否有浮层 / 接管层处于激活态（全局快捷键据此短路） */
+export const isOverlayOpen = () => openCount > 0 || grabCount > 0;
+
+/** 全屏接管层置位 / 复位：底层视图在此期间收不到 Space / 1-8 / Esc */
+export function grabInput(on: boolean): void {
+  grabCount = Math.max(0, grabCount + (on ? 1 : -1));
+}
 
 const SPRING = { type: 'spring', stiffness: 380, damping: 34 } as const;
 

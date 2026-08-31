@@ -424,7 +424,8 @@ export class AudioEngine {
     const ticksPerStep = transport.PPQ / 4;
     return {
       stepFloat: transport.ticks / ticksPerStep,
-      stepSeconds: Tone.Time('16n').toSeconds(),
+      /* 逐帧轮询，不能每次 new Tone.Time：按 BPM 直接算 16 分时长 */
+      stepSeconds: 60 / transport.bpm.value / 4,
     };
   }
 

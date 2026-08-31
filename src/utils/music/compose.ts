@@ -65,7 +65,7 @@ const DRUM_COLORS: Record<DrumType, string> = {
   tom: '#4D9FFF',
 };
 
-const ROLE_LABEL: Record<RoleId, string> = {
+export const ROLE_LABEL: Record<RoleId, string> = {
   bass: 'Bass',
   lead: 'Lead',
   keys: 'Keys',
